@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { ImageBackground, StyleSheet } from 'react-native';
 import NavItem from './NavItem';
 
+// Navigation Bar Element
 export default function NavigationBar({ onSelect, currentPage }) {
   const [selectedTab, setSelectedTab] = useState(currentPage);
 
+  // Handler for changing pages and setting state of current tab
   const handlePress = (tab) => {
     setSelectedTab(tab);
     onSelect(tab);
@@ -15,16 +17,16 @@ export default function NavigationBar({ onSelect, currentPage }) {
   }, [currentPage]);
   
   return (
-    <View style={styles.navBar}>
-
-      <NavItem handlePress={handlePress} selectedTab={selectedTab} imageSource={require('../../assets/Home.png')} height={33} itemName='Home' styles={styles} />
-      <NavItem handlePress={handlePress} selectedTab={selectedTab} imageSource={require('../../assets/Workouts.png')} height={38} itemName='Workouts' styles={styles} />
-      <NavItem handlePress={handlePress} selectedTab={selectedTab} imageSource={require('../../assets/Activities.png')} height={33} itemName='Activities' styles={styles} />
-    
-    </View>
+    // Navigation bar image background with Home, Workouts and Activity buttons
+    <ImageBackground source={require('../../assets/BarBackground.png')} style={styles.navBar}>
+      <NavItem handlePress={handlePress} selectedTab={selectedTab} imageSource={require('../../assets/Home.png')}itemName='Home' styles={styles} />
+      <NavItem handlePress={handlePress} selectedTab={selectedTab} imageSource={require('../../assets/Workouts.png')} itemName='Workouts' styles={styles} />
+      <NavItem handlePress={handlePress} selectedTab={selectedTab} imageSource={require('../../assets/Activities.png')} itemName='Activities' styles={styles} />
+    </ImageBackground>
   );
 }
 
+// Custom styling for elements
 const styles = StyleSheet.create({
   navBar: {
     flexDirection: 'row',
@@ -32,15 +34,18 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingTop: 8,
     backgroundColor: '#ffffff',
-    borderTopWidth: 0, // Add a border to the top
-    borderTopColor: '#e0e0e0', // Set the border color
-    shadowColor: '#868686', // Set the shadow color
-    shadowOffset: { width: 0, height: -2 }, // Set the shadow offset to create a shadow at the top
-    shadowOpacity: 0.25, // Set the shadow opacity
-    shadowRadius: 4.84, // Set the shadow radius
-    elevation: 5, // This is necessary for Android to display the shadow
+    borderTopWidth: 0,
+    borderTopColor: '#e0e0e0',
+    shadowColor: '#868686',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4.84,
+    elevation: 5,
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    zIndex: 10,
   },
-  
   navItem: {
     flex: 1,
     alignItems: 'center',
@@ -49,7 +54,6 @@ const styles = StyleSheet.create({
   },
   navText: {
     color: '#b6b6b6',
-    
     fontWeight: '400',
   },
   navTextSelected: {

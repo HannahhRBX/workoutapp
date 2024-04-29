@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, TouchableOpacity, Image, Text } from 'react-native';
 
-export default NavItem = ({ handlePress, selectedTab, imageSource, height, itemName, styles }) => (
+// Navigation Bar Item Image with Title
+export default NavItem = ({ handlePress, selectedTab, imageSource, itemName, styles }) => (
   <View style={styles.navItem}>
     <TouchableOpacity onPress={() => handlePress(itemName)} style={{  alignItems: 'center', justifyContent: 'center' }}>
       <Image
