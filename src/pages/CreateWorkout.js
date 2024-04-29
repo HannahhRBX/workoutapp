@@ -1,34 +1,35 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyledButton } from '../components/StyledButton';
 import { ImageBackground } from 'react-native';
 import Background from '../../assets/Background2.png';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
-import NavigationBar from '../components/NavigationBar';
+import SubmitBar from '../components/SubmitBar';
 import SelectedTabContext from '../../SelectedTabContext';
 import ActivityWidget from '../components/ActivityWidget';
+import AddWidget from '../components/AddWidget';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-// Activities Page
-export default function Activities({ navigation }) {
+// Create Workout Page
+export default function CreateWorkout({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [activities, setActivities] = useState([]);
-
+  const [date, setDate] = useState(new Date());
+  const [timestamp, setTimestamp] = useState('');
+  const [show, setShow] = useState(false);
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const monthNumber = 1; // Replace this with your month number
+  const monthName = monthNames[monthNumber - 1]; // Subtract 1 because arrays are 0-indexed
+  console.log(monthName);
   // Delete user from local storage and navigate to welcome page
-  const logoutUser = async () => {
-    try {
-      await AsyncStorage.removeItem('user');
-      navigation.navigate('Welcome');
-    } catch(e) {
-      console.error(e);
-    }
-  }
+  
 
   // Get all activities from workout API
-  const GetActivities = async () => {
-    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/activities', {
+  const GetActivitiesFromWorkout = async () => {
+    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -44,23 +45,38 @@ export default function Activities({ navigation }) {
 
   // Refresh on reload after managing or creating an activity
   useEffect(() => {
-    GetActivities();
+    GetActivitiesFromWorkout();
   }, []);
 
   // Create and Manage Activity functions
   const Manage = async (activity) => {
     navigation.navigate('ManageActivity', { activity });
-  }
+  };
+
+  const AddActivity = async () => {
+    navigation.navigate('AddActivities');
+  };
 
   const Create = async () => {
-    navigation.navigate('CreateActivity');
-  }
+    navigation.navigate('Workouts');
+  };
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShow(Platform.OS === 'ios');
+    setDate(currentDate);
+    const timestamp = date.getTime(); // your Unix timestamp here
+    const dateFromTimestamp = new Date(timestamp); // Convert the timestamp to milliseconds
+    const dateString = dateFromTimestamp.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+    console.log(dateString); // Outputs something like "Mon 29 April 2024"
+    setTimestamp(dateString);
+  };
 
   // Allows for the navigation bar to be rerendered after navigating to different page
   useFocusEffect(
     React.useCallback(() => {
-      setSelectedTab('Activities');
-      GetActivities();
+      setSelectedTab('Workouts');
+      GetActivitiesFromWorkout();
     }, [])
   );
   if (user) {
@@ -70,27 +86,42 @@ export default function Activities({ navigation }) {
       <>
         <ImageBackground source={Background} style={styles.container}>
           {/* Top Navigation Bar with Logout and Create Activity buttons */}
-          <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
-          <Text style={styles.header}>Activities</Text>
+          <View style={styles.topBar}>
+          <Text style={styles.header}>Create Workout</Text>
             <View style={styles.topLeftButton}>
-              <StyledButton title="" onPress={logoutUser} image={require('../../assets/Logout.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+              <StyledButton title="" onPress={() => navigation.navigate('Workouts')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
             </View>
-            <View style={styles.topRightButton}>
-              <StyledButton title="" onPress={Create} image={require('../../assets/Plus.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+            
             </View>
-            </ImageBackground>
 
           {/* Container for all Activity widgets with scrollable content box */}
+          
           <View style={styles.innerContainer}>
-            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 200, minHeight: (320 * activities.length) + 200}}>
+            <Text style={{...styles.header2, marginTop: 5}}>{timestamp}</Text>
+            
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode={'date'}
+              is24Hour={true}
+              display="default"
+              onChange={onChange}
+            />
+
+            <Text style={styles.header2}>Workout Activities</Text>
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 300, minHeight: (320 * activities.length) + 300}}>
+              <AddWidget key={1} onPress={() => AddActivity()} />
               {activities.map((activity) => (
                 <ActivityWidget key={activity.id} onPress={() => Manage(activity)} activity={activity} buttonText={"Manage"} />
+                
               ))}
+              
             </ScrollView>
           </View>
+          <SubmitBar onPress={Create} />
         </ImageBackground>
-        {/* Bottom Navigation Bar */}
-        <NavigationBar onSelect={navigation.navigate} currentPage={selectedTab} />
+        
+        
       </>
     );
   }else{
@@ -153,6 +184,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
     paddingTop: 20,
+    flexDirection: 'column',
   },
   widgetContainer: {
     flex: 1,
@@ -174,8 +206,10 @@ const styles = StyleSheet.create({
     fontSize: 18, 
   },
   header: {
+    flex: 1,
     fontSize: 30,
-    fontWeight: '600',
+    fontWeight: '800',
+    marginBottom: 50,
     color: '#2f2f2f',
     textAlign: 'center',
     justifyContent: 'center',
@@ -185,7 +219,9 @@ const styles = StyleSheet.create({
   header2: {
     fontSize: 24,
     fontWeight: '600',
-    marginBottom: 20,
+    marginBottom: 10,
+    marginTop: 30,
+    color: '#2f2f2f',
   },
   topLeftButton: {
     position: 'absolute',

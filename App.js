@@ -11,6 +11,8 @@ import Register from './src/pages/Register';
 import Welcome from './src/pages/Welcome';
 import Home from './src/pages/Home';
 import Workouts from './src/pages/Workouts';
+import CreateWorkout from './src/pages/CreateWorkout';
+import AddActivities from './src/pages/AddActivities';
 import Activities from './src/pages/Activities';
 import ManageActivity from './src/pages/ManageActivity';
 import CreateActivity from './src/pages/CreateActivity';
@@ -56,6 +58,8 @@ export default function App() {
           {/* The screens to show when the user is logged in */}
           <Stack.Screen name="Home" component={Home} options={{animationEnabled: false}} initialParams={{ user: user }} />
           <Stack.Screen name="Workouts" component={Workouts} options={{animationEnabled: false}} initialParams={{ user: user }} />
+          <Stack.Screen name="CreateWorkout" component={CreateWorkout} initialParams={{ user: user }} />
+          <Stack.Screen name="AddActivities" component={AddActivities} initialParams={{ user: user }} />
           <Stack.Screen name="Activities" component={Activities} options={{animationEnabled: false}} initialParams={{ user: user }} />
           <Stack.Screen name="CreateActivity" component={CreateActivity} initialParams={{ user: user }} />
           <Stack.Screen name="ManageActivity" component={ManageActivity} initialParams={{ user: user }} />

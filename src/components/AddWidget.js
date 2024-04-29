@@ -2,24 +2,18 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StyledButton } from './StyledButton';
 
-const ActivityWidget = ({ activity, onPress, buttonText }) => {
+const AddWidget = ({ onPress }) => {
   return (
     <View style={styles.activityWidget}>
       <View style={styles.innerWidget}>
-        <View style={styles.activityTitle}>
-          <Text style={styles.activityHeader}>{activity.name}</Text>
-          <Text style={styles.activityHeader2}>{activity.type}</Text>
-        </View>
-        <View style={{height: '51%', width: '100%'}}>
-          <Text style={styles.activityBody}>{activity.description}</Text>
-        </View>
-        <StyledButton title={buttonText} onPress={() => onPress(activity.id)} style={{ backgroundColor: '#514eb5', width: '95%', height: '18%',marginBottom:'3%', borderRadius: 8}} fontSize={20} />
+        
+        <StyledButton title="" image={require('../../assets/Plus2.png')} onPress={() => onPress()} style={{ backgroundColor: '#514eb5', width: '100%', height: '100%', borderRadius: 8}} fontSize={20} />
       </View>
     </View>
   );
 };
 
-export default ActivityWidget;
+export default AddWidget;
 
 const styles = StyleSheet.create({
   activityWidget: {
@@ -28,10 +22,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     
     zIndex: 2,
-    backgroundColor: '#ffffff', 
+    backgroundColor: 'transparent', 
     width:'90%',
     minWidth:'90%', 
-    height: 280,
+    height: 60,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -50,14 +44,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width:'100%',
     zIndex: 2,
-    backgroundColor: '#ffffff', 
+    backgroundColor: 'transparent', 
     height: '100%',
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    borderRadius: 10,
+    borderRadius: 11,
     margin: 20,
     overflow: 'hidden',
     borderWidth: 2,

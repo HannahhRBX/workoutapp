@@ -8,23 +8,20 @@ import { useRoute, useFocusEffect } from '@react-navigation/native';
 import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
 import ActivityWidget from '../components/ActivityWidget';
+import { TimerPickerModal } from "react-native-timer-picker";
+import { LinearGradient } from 'expo-linear-gradient';
 
-// Activities Page
-export default function Activities({ navigation }) {
+// Add Activities Page
+export default function AddActivities({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [activities, setActivities] = useState([]);
-
+  const [showPicker, setShowPicker] = useState(false);
+  const [time, setTime] = useState(0);
+  console.log(time);
   // Delete user from local storage and navigate to welcome page
-  const logoutUser = async () => {
-    try {
-      await AsyncStorage.removeItem('user');
-      navigation.navigate('Welcome');
-    } catch(e) {
-      console.error(e);
-    }
-  }
+  
 
   // Get all activities from workout API
   const GetActivities = async () => {
@@ -71,26 +68,47 @@ export default function Activities({ navigation }) {
         <ImageBackground source={Background} style={styles.container}>
           {/* Top Navigation Bar with Logout and Create Activity buttons */}
           <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
-          <Text style={styles.header}>Activities</Text>
-            <View style={styles.topLeftButton}>
-              <StyledButton title="" onPress={logoutUser} image={require('../../assets/Logout.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+          <Text style={styles.header}>Add Activities</Text>
+          <View style={styles.topLeftButton}>
+              <StyledButton title="" onPress={() => navigation.navigate('CreateWorkout')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
             </View>
-            <View style={styles.topRightButton}>
-              <StyledButton title="" onPress={Create} image={require('../../assets/Plus.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
-            </View>
+            <TimerPickerModal
+              visible={showPicker}
+              hideSeconds
+              setIsVisible={setShowPicker}
+              onConfirm={(pickedDuration) => {
+                  setTime((pickedDuration.hours * 60) + pickedDuration.minutes);
+                  setShowPicker(false);
+                 
+              }}
+              modalTitle="Activity Duration"
+              onCancel={() => setShowPicker(false)}
+              closeOnOverlayPress
+              LinearGradient={LinearGradient}
+              
+              styles={{
+                  theme: "light",
+                  button: {
+                    fontWeight: 'bold',
+                  }
+              }}
+              modalProps={{
+                  overlayOpacity: 0.8,
+              }}
+            />
+
             </ImageBackground>
 
           {/* Container for all Activity widgets with scrollable content box */}
           <View style={styles.innerContainer}>
             <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 200, minHeight: (320 * activities.length) + 200}}>
               {activities.map((activity) => (
-                <ActivityWidget key={activity.id} onPress={() => Manage(activity)} activity={activity} buttonText={"Manage"} />
+                <ActivityWidget key={activity.id} onPress={() => { setShowPicker(true)}} activity={activity} buttonText={"Add"} />
               ))}
             </ScrollView>
           </View>
         </ImageBackground>
-        {/* Bottom Navigation Bar */}
-        <NavigationBar onSelect={navigation.navigate} currentPage={selectedTab} />
+        
       </>
     );
   }else{
