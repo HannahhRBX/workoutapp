@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StyledButton } from './StyledButton';
-import { FormatDuration } from '../functions/formatDuration';
+import { FormatDuration } from '../functions/FormatDuration';
 
 const WorkoutWidget = ({ workout, onPress, buttonText }) => {
   // Calculate total duration through sum of all activities in workout

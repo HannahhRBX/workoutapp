@@ -8,7 +8,7 @@ import { useRoute, useFocusEffect } from '@react-navigation/native';
 import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
 import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
-import { FormatDuration } from '../functions/formatDuration';
+import { FormatDuration } from '../functions/FormatDuration';
 import { TimerPickerModal } from "react-native-timer-picker";
 import { LinearGradient } from 'expo-linear-gradient';
 

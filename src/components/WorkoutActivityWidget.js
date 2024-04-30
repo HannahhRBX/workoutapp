@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StyledButton } from './StyledButton';
-import { FormatDuration } from '../functions/formatDuration';
+import { FormatDuration } from '../functions/FormatDuration';
 
 // Workout Activity Widget
 const WorkoutActivityWidget = ({ activity, duration, onPress, buttonText }) => {
