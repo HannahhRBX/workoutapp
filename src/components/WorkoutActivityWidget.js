@@ -1,13 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StyledButton } from './StyledButton';
+import { FormatDuration } from '../functions/formatDuration';
 
 // Workout Activity Widget
 const WorkoutActivityWidget = ({ activity, duration, onPress, buttonText }) => {
   // Convert duration to hours and minutes
-  const Hours = Math.floor(duration / 60);
-  const Minutes = duration % 60;
-  duration = Hours + 'h ' + Minutes + 'm';
+  duration = FormatDuration({ duration: duration });
   
   return (
     // Returns modified Activity Widget alongside duration under text body

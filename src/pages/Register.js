@@ -33,11 +33,10 @@ export default function Register({ navigation }) {
     
     if(response.ok) {
       const result = await response.json();
-      console.log("Registration successful",result);
+      navigation.navigate('Login');
     } else {
       // handle error
       const result = await response.json();
-      console.log(result)
     }
   }
   

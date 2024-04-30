@@ -8,6 +8,7 @@ import { useRoute, useFocusEffect } from '@react-navigation/native';
 import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
 import WorkoutWidget from '../components/WorkoutWidget';
+import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
 
 // Workouts Page
 export default function Workouts({ navigation }) {
@@ -15,6 +16,7 @@ export default function Workouts({ navigation }) {
   // Use route params to get user
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
+  const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   const [workouts, setWorkouts] = useState([]);
 
   // Delete user from local storage and navigate to welcome page
@@ -29,7 +31,7 @@ export default function Workouts({ navigation }) {
 
   // Get all workouts by UserID from workout API
   const GetWorkouts = async () => {
-    console.log(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/user/${user.id}`)
+    
     const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/user/${user.id}`, {
         method: 'GET',
         headers: {
@@ -42,7 +44,7 @@ export default function Workouts({ navigation }) {
       setWorkouts(data);
     }else{
       const data = await response.json();
-      console.log(data);
+      
     }
 
   }
@@ -53,8 +55,8 @@ export default function Workouts({ navigation }) {
   }, []);
 
   // Create and Manage Activity functions
-  const Manage = async (activity) => {
-    navigation.navigate('ManageActivity', { activity });
+  const Manage = async (workout) => {
+    navigation.navigate('ManageWorkout', { workout });
   }
 
   const Create = async () => {
@@ -64,6 +66,7 @@ export default function Workouts({ navigation }) {
   // Allows for the navigation bar and workouts to be rerendered after navigating to different page
   useFocusEffect(
     React.useCallback(() => {
+      setCreateWorkoutActivities([]);
       setSelectedTab('Workouts');
       GetWorkouts();
     }, [])

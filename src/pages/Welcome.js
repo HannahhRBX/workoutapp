@@ -27,7 +27,7 @@ export default function Welcome({ navigation }) {
       console.log("Login successful",result);
     } else {
       // handle error
-      console.log(response.status)
+      
     }
   }
 

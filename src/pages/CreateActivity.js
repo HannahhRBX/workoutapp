@@ -30,7 +30,7 @@ export default function CreateActivity({ navigation }) {
       },
     });
     let result = await response.json();
-    console.log(result);
+    
     if(response.ok) {
       // If response ok, navigate back to activities page
       navigation.navigate('Activities');

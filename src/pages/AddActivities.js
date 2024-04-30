@@ -23,7 +23,7 @@ export default function AddActivities({ navigation }) {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
   const [time, setTime] = useState(0);
-  console.log(time);
+  
   // Delete user from local storage and navigate to welcome page
   
 

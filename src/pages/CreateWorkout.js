@@ -10,24 +10,18 @@ import WorkoutActivityWidget from '../components/WorkoutActivityWidget';
 import AddWidget from '../components/AddWidget';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
-import uuid from 'react-native-uuid';
 
 // Create Workout Page
 export default function CreateWorkout({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
    
+  // Use context to get and set activities for the workout
   const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   const [date, setDate] = useState(new Date());
   const [timestamp, setTimestamp] = useState('');
   const [show, setShow] = useState(false);
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  const monthNumber = 1; // Replace this with your month number
-  const monthName = monthNames[monthNumber - 1]; // Subtract 1 because arrays are 0-indexed
   
-  // Delete user from local storage and navigate to welcome page
-  
-
   // Get all activities from workout API
   const GetActivitiesFromWorkout = async () => {
     const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
@@ -42,16 +36,9 @@ export default function CreateWorkout({ navigation }) {
      
     }
 
-  }
+  } 
 
-  console.log(timestamp); // Outputs something like "Mon 29 April 2024"
-  // Refresh on reload after managing or creating an activity
-  
-  const AddActivityToWorkout = async (activity, duration) => {
-    
-  };
- console.log(createWorkoutActivities);
-
+  // Add Activity to Workout
   const AddActivity = async () => {
     navigation.navigate('AddActivities', {
       onConfirm: AddActivityToWorkout,
@@ -108,6 +95,12 @@ export default function CreateWorkout({ navigation }) {
     navigation.navigate('Workouts');
   };
 
+  // Send to Manage Workout Activity Page
+  const Manage = async (workoutActivity, index) => {
+    console.log("WorkoutActivity Management: ",workoutActivity,index);
+    navigation.navigate('ManageWorkoutActivity', { workoutActivity, index });
+  }
+
   const onChange = (event, selectedDate) => {
     // Converts OS date format to javascript date format
     const currentDate = selectedDate || date;
@@ -158,13 +151,13 @@ export default function CreateWorkout({ navigation }) {
             <Text style={styles.header2}>Workout Activities</Text>
             <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (340 * createWorkoutActivities.length) + 320, minHeight: (340 * createWorkoutActivities.length) + 320}}>
               <AddWidget key={1} onPress={() => AddActivity()} />
-              {createWorkoutActivities.map((activityItem) => (
-                <WorkoutActivityWidget key={uuid.v4()} onPress={() => Manage(activityItem.activity)} activity={activityItem.activity} duration={activityItem.duration} buttonText={"Manage"} />
+              {createWorkoutActivities.map((activityItem, index) => (
+                <WorkoutActivityWidget key={index} onPress={() => Manage(activityItem, index)} activity={activityItem.activity} duration={activityItem.duration} buttonText={"Manage"} />
               ))}
               
             </ScrollView>
           </View>
-          <SubmitBar onPress={Create} />
+          <SubmitBar onPress={Create} buttonText={"Create"} />
         </ImageBackground>
         
         
@@ -253,14 +246,14 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1,
-    fontSize: 30,
+    fontSize: 29,
     fontWeight: '800',
     marginBottom: 50,
     color: '#2f2f2f',
     textAlign: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    top: 57,
+    top: 58,
   },
   header2: {
     fontSize: 24,

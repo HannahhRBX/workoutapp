@@ -1,14 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StyledButton } from './StyledButton';
+import { FormatDuration } from '../functions/formatDuration';
 
 const WorkoutWidget = ({ workout, onPress, buttonText }) => {
   // Calculate total duration through sum of all activities in workout
   let duration = workout.workoutActivities.reduce((acc, activity) => acc + activity.duration, 0);
+  duration = FormatDuration({ duration: duration });
   // Convert duration to hours and minutes
-  const Hours = Math.floor(duration / 60);
-  const Minutes = duration % 60;
-  duration = Hours + 'h ' + Minutes + 'm';
   // Convert unix timestamp string back to int
   const timestampInt = parseInt(workout.timestamp, 10);
   const dateFromTimestamp = new Date(timestampInt);

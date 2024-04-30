@@ -30,7 +30,7 @@ export default function Login({ navigation }) {
       })
       if(response.ok) {
         const result = await response.json();
-        console.log("Login successful",result);
+        
 
         // Store the result object in local storage
         try {

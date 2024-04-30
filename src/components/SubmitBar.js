@@ -4,15 +4,12 @@ import NavItem from './NavItem';
 import { StyledButton } from './StyledButton';
 
 // Submit Button Bottom Bar Element
-export default function SubmitBar({ onPress }) {
-  // Handler for changing pages and setting state of current tab
-  
-
-  
+export default function SubmitBar({ onPress, buttonText }) {
+    
   return (
-    // Navigation bar image background with Home, Workouts and Activity buttons
+    // Submit Button Bottom Bar with custom Button Text and onPress handler
     <ImageBackground source={require('../../assets/BarBackground.png')} style={styles.navBar}>
-      <StyledButton title="Create" onPress={onPress} style={{ backgroundColor: '#514eb5', width: 230, height: 50, margin: 20 }} fontSize={20} />
+      <StyledButton title={buttonText} onPress={onPress} style={{ backgroundColor: '#514eb5', width: 230, height: 50, margin: 25, marginTop: 10 }} fontSize={20} />
     </ImageBackground>
   );
 }
@@ -23,7 +20,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 10,
-    paddingTop: 8,
     backgroundColor: '#ffffff',
     borderTopWidth: 0,
     borderTopColor: '#e0e0e0',
