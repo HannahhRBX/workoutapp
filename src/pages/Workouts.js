@@ -7,18 +7,16 @@ import Background from '../../assets/Background2.png';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
-import ActivityWidget from '../components/ActivityWidget';
+import WorkoutWidget from '../components/WorkoutWidget';
 
 // Workouts Page
 export default function Workouts({ navigation }) {
   const route = useRoute();
+  // Use route params to get user
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
-  const [activities, setActivities] = useState([]);
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  const monthNumber = 1; // Replace this with your month number
-  const monthName = monthNames[monthNumber - 1]; // Subtract 1 because arrays are 0-indexed
-  console.log(monthName);
+  const [workouts, setWorkouts] = useState([]);
+
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {
@@ -29,25 +27,29 @@ export default function Workouts({ navigation }) {
     }
   }
 
-  // Get all activities from workout API
-  const GetActivities = async () => {
-    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/activities', {
+  // Get all workouts by UserID from workout API
+  const GetWorkouts = async () => {
+    console.log(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/user/${user.id}`)
+    const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/user/${user.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
     });
-    // If response ok, set activities to Activities state
+    // If response ok, set retrieved workouts to workouts state
     if (response.ok){
       const data = await response.json();
-      setActivities(data);
+      setWorkouts(data);
+    }else{
+      const data = await response.json();
+      console.log(data);
     }
 
   }
 
-  // Refresh on reload after managing or creating an activity
+  // Refresh on reload after managing or creating a workout
   useEffect(() => {
-    GetActivities();
+    GetWorkouts();
   }, []);
 
   // Create and Manage Activity functions
@@ -59,11 +61,11 @@ export default function Workouts({ navigation }) {
     navigation.navigate('CreateWorkout');
   }
 
-  // Allows for the navigation bar to be rerendered after navigating to different page
+  // Allows for the navigation bar and workouts to be rerendered after navigating to different page
   useFocusEffect(
     React.useCallback(() => {
       setSelectedTab('Workouts');
-      GetActivities();
+      GetWorkouts();
     }, [])
   );
   if (user) {
@@ -72,7 +74,7 @@ export default function Workouts({ navigation }) {
       // Background to be replicated across page
       <>
         <ImageBackground source={Background} style={styles.container}>
-          {/* Top Navigation Bar with Logout and Create Activity buttons */}
+          {/* Top Navigation Bar with Logout and Create Workout buttons */}
           <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
           <Text style={styles.header}>Workouts</Text>
             <View style={styles.topLeftButton}>
@@ -83,11 +85,11 @@ export default function Workouts({ navigation }) {
             </View>
             </ImageBackground>
 
-          {/* Container for all Activity widgets with scrollable content box */}
+          {/* Container for all Workout widgets with scrollable content box */}
           <View style={styles.innerContainer}>
-            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 200, minHeight: (320 * activities.length) + 200}}>
-              {activities.map((activity) => (
-                <ActivityWidget key={activity.id} onPress={() => Manage(activity)} activity={activity} />
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * workouts.length) + 200, minHeight: (320 * workouts.length) + 200}}>
+              {workouts.map((workout) => (
+                <WorkoutWidget key={workout.id} onPress={() => Manage(workout)} workout={workout} buttonText={"Details"} />
               ))}
             </ScrollView>
           </View>

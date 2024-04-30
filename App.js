@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, navigation } from '@react-navigation/stack';
 
 import SelectedTabContext from './SelectedTabContext';
+import { CreateWorkoutActivityContext } from './CreateWorkoutActivityContext';
 import Login from './src/pages/Login';
 import Register from './src/pages/Register';
 import Welcome from './src/pages/Welcome';
@@ -28,6 +29,9 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true); 
   const [selectedTab, setSelectedTab] = useState('Home');
+  const [createWorkoutActivities, setCreateWorkoutActivities] = useState([]);
+
+  
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,6 +55,7 @@ export default function App() {
   return (
     // Navigation to render various pages
     <>
+    <CreateWorkoutActivityContext.Provider value={[ createWorkoutActivities, setCreateWorkoutActivities ]}>
     <SelectedTabContext.Provider value={{ selectedTab, setSelectedTab }}>
     <NavigationContainer>
       {user ? (
@@ -80,7 +85,7 @@ export default function App() {
       <StatusBar style="auto" />
     </NavigationContainer>
     </SelectedTabContext.Provider>
-      
+    </CreateWorkoutActivityContext.Provider>
     
     </>
   );

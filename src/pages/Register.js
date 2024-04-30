@@ -22,7 +22,7 @@ export default function Register({ navigation }) {
     };
     // Get login response from API
     
-    const response = await fetch('https://localhost:7267/api/auth/register', {
+    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
@@ -33,7 +33,7 @@ export default function Register({ navigation }) {
     
     if(response.ok) {
       const result = await response.json();
-      console.log("Reegistration successful",result);
+      console.log("Registration successful",result);
     } else {
       // handle error
       const result = await response.json();

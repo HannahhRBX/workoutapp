@@ -6,24 +6,25 @@ import { ImageBackground } from 'react-native';
 import Background from '../../assets/Background2.png';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import SubmitBar from '../components/SubmitBar';
-import SelectedTabContext from '../../SelectedTabContext';
-import ActivityWidget from '../components/ActivityWidget';
+import WorkoutActivityWidget from '../components/WorkoutActivityWidget';
 import AddWidget from '../components/AddWidget';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
+import uuid from 'react-native-uuid';
 
 // Create Workout Page
 export default function CreateWorkout({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
-  const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
-  const [activities, setActivities] = useState([]);
+   
+  const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   const [date, setDate] = useState(new Date());
   const [timestamp, setTimestamp] = useState('');
   const [show, setShow] = useState(false);
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const monthNumber = 1; // Replace this with your month number
   const monthName = monthNames[monthNumber - 1]; // Subtract 1 because arrays are 0-indexed
-  console.log(monthName);
+  
   // Delete user from local storage and navigate to welcome page
   
 
@@ -38,44 +39,89 @@ export default function CreateWorkout({ navigation }) {
     // If response ok, set activities to Activities state
     if (response.ok){
       const data = await response.json();
-      setActivities(data);
+     
     }
 
   }
 
+  console.log(timestamp); // Outputs something like "Mon 29 April 2024"
   // Refresh on reload after managing or creating an activity
-  useEffect(() => {
-    GetActivitiesFromWorkout();
-  }, []);
-
-  // Create and Manage Activity functions
-  const Manage = async (activity) => {
-    navigation.navigate('ManageActivity', { activity });
+  
+  const AddActivityToWorkout = async (activity, duration) => {
+    
   };
+ console.log(createWorkoutActivities);
 
   const AddActivity = async () => {
-    navigation.navigate('AddActivities');
+    navigation.navigate('AddActivities', {
+      onConfirm: AddActivityToWorkout,
+    });
   };
 
   const Create = async () => {
+    // Form validation to check for empty timestamp or activity array
+    if (createWorkoutActivities.length == 0){
+      alert('Please add at least one activity to the workout');
+      return;
+    }
+    if (timestamp == ''){
+      alert('Please select a date for the workout');
+      return;
+    }
+    // POST request to create a workout using userId with timestamp
+    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
+        method: 'POST',
+        body: JSON.stringify({
+          userID: user.id,
+          timestamp: timestamp,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+    });
+    // If response ok, create workout activities using newly created workout ID
+    if (response.ok){
+      const data = await response.json();
+      const workoutID = data.id;
+      // Iterate through activity state and create link table WorkoutActivity entries for each activity
+      createWorkoutActivities.forEach(async (activityItem) => {
+        const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity', {
+          method: 'POST',
+          body: JSON.stringify({
+            workoutID: workoutID,
+            activityID: activityItem.activity.id,
+            duration: activityItem.duration,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok){
+          const data = await response.json();
+        }
+      }
+      );
+    }else{
+      alert('Failed to create workout');
+    };
+
     navigation.navigate('Workouts');
   };
 
   const onChange = (event, selectedDate) => {
+    // Converts OS date format to javascript date format
     const currentDate = selectedDate || date;
+    // Will close the date picker on iOS after selection
     setShow(Platform.OS === 'ios');
     setDate(currentDate);
-    const timestamp = date.getTime(); // your Unix timestamp here
-    const dateFromTimestamp = new Date(timestamp); // Convert the timestamp to milliseconds
-    const dateString = dateFromTimestamp.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-    console.log(dateString); // Outputs something like "Mon 29 April 2024"
-    setTimestamp(dateString);
+    // Convert unix timestamp to string
+    const timestamp = date.getTime().toString();
+    setTimestamp(timestamp);
   };
 
-  // Allows for the navigation bar to be rerendered after navigating to different page
+  // Allows for the activities to be rerendered after navigating to different page
   useFocusEffect(
     React.useCallback(() => {
-      setSelectedTab('Workouts');
       GetActivitiesFromWorkout();
     }, [])
   );
@@ -87,17 +133,17 @@ export default function CreateWorkout({ navigation }) {
         <ImageBackground source={Background} style={styles.container}>
           {/* Top Navigation Bar with Logout and Create Activity buttons */}
           <View style={styles.topBar}>
-          <Text style={styles.header}>Create Workout</Text>
+            <Text style={styles.header}>Create Workout</Text>
             <View style={styles.topLeftButton}>
               <StyledButton title="" onPress={() => navigation.navigate('Workouts')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
             </View>
             
-            </View>
+          </View>
 
           {/* Container for all Activity widgets with scrollable content box */}
           
           <View style={styles.innerContainer}>
-            <Text style={{...styles.header2, marginTop: 5}}>{timestamp}</Text>
+            <Text style={{...styles.header2, marginTop: 5}}>Workout Date</Text>
             
             <DateTimePicker
               testID="dateTimePicker"
@@ -108,12 +154,12 @@ export default function CreateWorkout({ navigation }) {
               onChange={onChange}
             />
 
+            {/* Iterate through all workout activities and create widgets in a scrollable list */}
             <Text style={styles.header2}>Workout Activities</Text>
-            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 300, minHeight: (320 * activities.length) + 300}}>
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (340 * createWorkoutActivities.length) + 320, minHeight: (340 * createWorkoutActivities.length) + 320}}>
               <AddWidget key={1} onPress={() => AddActivity()} />
-              {activities.map((activity) => (
-                <ActivityWidget key={activity.id} onPress={() => Manage(activity)} activity={activity} buttonText={"Manage"} />
-                
+              {createWorkoutActivities.map((activityItem) => (
+                <WorkoutActivityWidget key={uuid.v4()} onPress={() => Manage(activityItem.activity)} activity={activityItem.activity} duration={activityItem.duration} buttonText={"Manage"} />
               ))}
               
             </ScrollView>

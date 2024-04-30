@@ -65,10 +65,10 @@ export default function CreateWorkout({ navigation }) {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === 'ios');
     setDate(currentDate);
-    const timestamp = date.getTime(); // your Unix timestamp here
-    const dateFromTimestamp = new Date(timestamp); // Convert the timestamp to milliseconds
+    const timestamp = date.getTime();
+    const dateFromTimestamp = new Date(timestamp);
     const dateString = dateFromTimestamp.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-    console.log(dateString); // Outputs something like "Mon 29 April 2024"
+    console.log(dateString);
     setTimestamp(dateString);
   };
 

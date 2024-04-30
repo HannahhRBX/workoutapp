@@ -13,10 +13,11 @@ export default function CreateActivity({ navigation }) {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [description, setDescription] = useState('');
-    
+  
   // Create activity through API
   const CreateActivity = async () => {
     const data = {
+      userID: user.id,
       name: name,
       type: type,
       description: description,
@@ -28,6 +29,8 @@ export default function CreateActivity({ navigation }) {
         'Content-Type': 'application/json',
       },
     });
+    let result = await response.json();
+    console.log(result);
     if(response.ok) {
       // If response ok, navigate back to activities page
       navigation.navigate('Activities');

@@ -15,7 +15,7 @@ export default function Activities({ navigation }) {
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [activities, setActivities] = useState([]);
-
+  console.log(activities);
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {

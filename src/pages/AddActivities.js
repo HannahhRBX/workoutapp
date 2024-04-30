@@ -10,13 +10,17 @@ import SelectedTabContext from '../../SelectedTabContext';
 import ActivityWidget from '../components/ActivityWidget';
 import { TimerPickerModal } from "react-native-timer-picker";
 import { LinearGradient } from 'expo-linear-gradient';
+import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
 
 // Add Activities Page
 export default function AddActivities({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
+  const { onConfirm } = route.params || {};
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
+  const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   const [activities, setActivities] = useState([]);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
   const [time, setTime] = useState(0);
   console.log(time);
@@ -68,8 +72,8 @@ export default function AddActivities({ navigation }) {
         <ImageBackground source={Background} style={styles.container}>
           {/* Top Navigation Bar with Logout and Create Activity buttons */}
           <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
-          <Text style={styles.header}>Add Activities</Text>
-          <View style={styles.topLeftButton}>
+            <Text style={styles.header}>Add Activities</Text>
+            <View style={styles.topLeftButton}>
               <StyledButton title="" onPress={() => navigation.navigate('CreateWorkout')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
             </View>
             <TimerPickerModal
@@ -77,9 +81,12 @@ export default function AddActivities({ navigation }) {
               hideSeconds
               setIsVisible={setShowPicker}
               onConfirm={(pickedDuration) => {
-                  setTime((pickedDuration.hours * 60) + pickedDuration.minutes);
                   setShowPicker(false);
+                  const activity = selectedActivity;
+                  const duration = (pickedDuration.hours * 60) + pickedDuration.minutes;
+                  setCreateWorkoutActivities(prevActivities => [...prevActivities, {activity, duration}]);
                  
+                  navigation.navigate('CreateWorkout');
               }}
               modalTitle="Activity Duration"
               onCancel={() => setShowPicker(false)}
@@ -103,7 +110,7 @@ export default function AddActivities({ navigation }) {
           <View style={styles.innerContainer}>
             <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 200, minHeight: (320 * activities.length) + 200}}>
               {activities.map((activity) => (
-                <ActivityWidget key={activity.id} onPress={() => { setShowPicker(true)}} activity={activity} buttonText={"Add"} />
+                <ActivityWidget key={activity.id} onPress={() => { setShowPicker(true); setSelectedActivity(activity)}} activity={activity} buttonText={"Add"} />
               ))}
             </ScrollView>
           </View>
