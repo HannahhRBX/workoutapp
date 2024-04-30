@@ -18,8 +18,9 @@ export default function ManageWorkoutActivity({ navigation }) {
   // Get user from route params
   let user = route.params?.user || null;
   // Get id, name and description from route params
-  let { id = null, workoutID = null, activityID = null, duration: initialDuration = 0, activity: initialActivity = [] } = route.params?.workoutActivity || {};
+  let { workoutID = null, activityID = null, duration: initialDuration = 0, activity: initialActivity = [] } = route.params?.workoutActivity || {};
   let index = route.params?.index || 0;
+  let redirect = route.params?.redirect || 'Workouts';
   //console.log(id, workoutID, activityID, initialDuration, initialActivity);
   let [duration, setDuration] = useState(initialDuration);
   let [formattedDuration, setFormattedDuration] = useState(FormatDuration({ duration: initialDuration }));
@@ -29,18 +30,19 @@ export default function ManageWorkoutActivity({ navigation }) {
 
   // Submit activity changes to context state
   const Submit = async () => {
+    console.log(createWorkoutActivities, duration, index, redirect)
     try {
       // Update the workoutActivity at the specified index
       const newWorkoutActivities = createWorkoutActivities.map((activity, activityIndex) => {
         if (activityIndex === index) {
-          return { activity: initialActivity, duration: duration };
+          return { activity: initialActivity, duration: duration, activityID: activityID, id: activity.id};
         }
         return activity;
       });
 
       // Update the state
       setCreateWorkoutActivities(newWorkoutActivities);
-      navigation.navigate('CreateWorkout');
+      navigation.navigate(redirect, { workout: route.params.workout });
       // If successful, navigate back to activities page
 
 
@@ -58,7 +60,7 @@ export default function ManageWorkoutActivity({ navigation }) {
 
       // Update state and send back to create workout page
       setCreateWorkoutActivities(newWorkoutActivities);
-      navigation.navigate('CreateWorkout');
+      navigation.navigate(redirect, { workout: route.params.workout });
       
     }catch (error) {
       console.error('Failed to delete the activity:', error);
@@ -73,7 +75,7 @@ export default function ManageWorkoutActivity({ navigation }) {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.container}>
             <View style={styles.topLeftButton}>
-              <StyledButton title="" onPress={() => navigation.navigate('CreateWorkout')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+              <StyledButton title="" onPress={() => navigation.navigate(redirect, { workout: route.params.workout })} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
             </View>
             <View style={styles.topRightButton}>
               <StyledButton title="" onPress={Delete} image={require('../../assets/Plus.png')} style={{ backgroundColor: '#e83f32', width: 50, height: 50, margin: 20, transform: [{ rotate: '45deg' }] }} fontSize={25}/>

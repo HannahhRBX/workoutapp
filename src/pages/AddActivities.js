@@ -16,6 +16,7 @@ import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext
 export default function AddActivities({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
+  let redirect = route.params?.redirect || 'Workouts';
   const { onConfirm } = route.params || {};
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
@@ -48,14 +49,6 @@ export default function AddActivities({ navigation }) {
     GetActivities();
   }, []);
 
-  // Create and Manage Activity functions
-  const Manage = async (activity) => {
-    navigation.navigate('ManageActivity', { activity });
-  }
-
-  const Create = async () => {
-    navigation.navigate('CreateActivity');
-  }
 
   // Allows for the navigation bar to be rerendered after navigating to different page
   useFocusEffect(
@@ -74,7 +67,7 @@ export default function AddActivities({ navigation }) {
           <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
             <Text style={styles.header}>Add Activities</Text>
             <View style={styles.topLeftButton}>
-              <StyledButton title="" onPress={() => navigation.navigate('CreateWorkout')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+              <StyledButton title="" onPress={() => navigation.navigate(redirect, { workout: route.params.workout })} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
             </View>
             <TimerPickerModal
               visible={showPicker}
@@ -86,7 +79,7 @@ export default function AddActivities({ navigation }) {
                   const duration = (pickedDuration.hours * 60) + pickedDuration.minutes;
                   setCreateWorkoutActivities(prevActivities => [...prevActivities, {activity, duration}]);
                  
-                  navigation.navigate('CreateWorkout');
+                  navigation.navigate(redirect,{ workout: route.params.workout });
               }}
               modalTitle="Activity Duration"
               onCancel={() => setShowPicker(false)}

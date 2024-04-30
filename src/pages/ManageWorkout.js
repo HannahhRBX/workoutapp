@@ -16,90 +16,174 @@ import uuid from 'react-native-uuid';
 export default function ManageWorkout({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
-  let { id = null, timestamp: initialTimestamp = '', userID = null, workoutActivities: initialWorkoutActivities = [] } = route.params?.workout || {};
-
-  console.log("Workout Management: ",id, userID, initialTimestamp, initialWorkoutActivities);
+  let { id, timestamp: initialTimestamp = '', userID, workoutActivities: initialWorkoutActivities = [] } = route.params?.workout || {};
 
   const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   
   const [timestamp, setTimestamp] = useState(initialTimestamp);
   const [date, setDate] = useState(new Date(Number(timestamp)));
   const [show, setShow] = useState(false);
-  
+  console.log(id,userID,timestamp);
   
   // Delete user from local storage and navigate to welcome page
   
 
-  // Get all activities from workout API
-  const GetActivitiesFromWorkout = async () => {
-    setCreateWorkoutActivities(initialWorkoutActivities.map((activity) => ({ activity: activity.activityDetails , duration: activity.duration })));
-  }
-
-  
-  const AddActivityToWorkout = async (activity, duration) => {
-    
-  };
- 
-
   const AddActivity = async () => {
     navigation.navigate('AddActivities', {
-      onConfirm: AddActivityToWorkout,
+      
+      redirect:"ManageWorkout",
+      workout: route.params.workout,
     });
   };
 
-  const Create = async () => {
+  const UpdateWorkoutActivities = async () => {
     // Form validation to check for empty timestamp or activity array
     if (createWorkoutActivities.length == 0){
       alert('Please add at least one activity to the workout');
       return;
     }
-    if (timestamp == ''){
-      alert('Please select a date for the workout');
-      return;
-    }
-    // POST request to create a workout using userId with timestamp
-    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
-        method: 'POST',
-        body: JSON.stringify({
-          userID: user.id,
-          timestamp: timestamp,
-        }),
+    
+    // GET request to retrieve the workout info from server
+    const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
     });
-    // If response ok, create workout activities using newly created workout ID
+    // If response ok, compare the workout from server to the workout in state
     if (response.ok){
       const data = await response.json();
+      const serverWorkoutActivities = data.workoutActivities;
+      const stateWorkoutActivities = createWorkoutActivities;
       const workoutID = data.id;
-      // Iterate through activity state and create link table WorkoutActivity entries for each activity
-      createWorkoutActivities.forEach(async (activityItem) => {
-        const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity', {
-          method: 'POST',
-          body: JSON.stringify({
-            workoutID: workoutID,
-            activityID: activityItem.activity.id,
-            duration: activityItem.duration,
-          }),
+      console.log("Workout DATA: ",serverWorkoutActivities);
+      console.log("\nState DATA: ",stateWorkoutActivities);
+
+      // If the server workout has activities
+      if (data.workoutActivities){
+        // Function to check if server has activities that client does not
+        serverWorkoutActivities.forEach(serverActivity => {
+          // If the server activity is not in the state activities, delete the activity from the server
+          const stateActivity = stateWorkoutActivities.find(stateActivity => stateActivity.id === serverActivity.id);
+          if (!stateActivity) {
+            // Send DELETE request
+            console.log("DELETING: ", serverActivity.id);
+            fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${serverActivity.id}`, {
+              method: 'DELETE',
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              console.log(`Deleted activity with id ${serverActivity.id}`);
+            })
+          } else {
+            // Send PUT request to update the workoutActivity data
+            console.log("UPDATING: ", serverActivity.id, stateActivity.duration, stateActivity.activityID);
+            fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${serverActivity.id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                id: stateActivity.id,
+                workoutID: workoutID,
+                activityID: stateActivity.activityID,
+                duration: stateActivity.duration,
+                
+                
+              }),
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              console.log(`Updated activity with id ${serverActivity.id}`);
+            })
+          }
+        });
+      }
+
+      // Function to check if state has activities that the server does not
+      stateWorkoutActivities.forEach(stateActivity => {
+        // If the state activity is not in the server activities, create the activity on the server
+        const serverActivity = serverWorkoutActivities.find(serverActivity => serverActivity.id === stateActivity.id);
+        if (!serverActivity) {
+          // Send POST request to create new workoutActivity
+          console.log("CREATING: ", stateActivity.duration, stateActivity.activity.id);
+          fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+
+                workoutID: workoutID,
+                activityID: stateActivity.activity.id,
+                duration: stateActivity.duration,
+              
+            }),
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            console.log(`Created workout activity with activity id ${stateActivity.activity.id} and workout id ${workoutID}`);
+          })
+        }
+      });
+      
+      navigation.navigate('Workouts');
+    };
+  }
+
+  console.log(createWorkoutActivities)
+  // Function to delete the workout and its workoutActivities
+  
+
+  // Update a workout with new timestamp and its activities
+  UpdateWorkout = async () => {
+    try{
+      // Catch form validation for empty timestamp
+      if (timestamp == ''){
+        alert('Please select a date for the workout');
+        return;
+      }
+      // PUT request to update workout info on server
+      const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-        });
-        if (response.ok){
-          const data = await response.json();
-        }
-      }
-      );
-    }else{
-      alert('Failed to create workout');
-    };
-
-    navigation.navigate('Workouts');
+          params: {
+            id,
+          },
+          body: JSON.stringify({
+            id,
+            userID,
+            timestamp,
+          }),
+      });
+      // If response ok, create workout activities using newly created workout ID
+      if (response.ok){  
+        console.log(id);
+        UpdateWorkoutActivities();
+        
+      }else{
+        // If response not ok, alert user
+        const data = await response.json();
+        console.log(data);
+        alert('Failed to create workout',id);
+      };
+    }catch (error){
+      console.error('Failed to update the workout:', error);
+    }
   };
 
+  
   const Manage = async (workoutActivity, index) => {
-    console.log("WorkoutActivity Management: ",workoutActivity,index);
-    navigation.navigate('ManageWorkoutActivity', { workoutActivity, index });
+    
+    navigation.navigate('ManageWorkoutActivity', { workoutActivity, index, redirect:"ManageWorkout", workout: route.params.workout });
   }
 
   const onChange = (event, selectedDate) => {
@@ -113,12 +197,7 @@ export default function ManageWorkout({ navigation }) {
     setTimestamp(timestamp);
   };
 
-  // Allows for the activities to be rerendered after navigating to different page
-  useFocusEffect(
-    React.useCallback(() => {
-      GetActivitiesFromWorkout();
-    }, [])
-  );
+  
   if (user) {
     
     return (
@@ -158,7 +237,7 @@ export default function ManageWorkout({ navigation }) {
               
             </ScrollView>
           </View>
-          <SubmitBar onPress={Create} buttonText={"Update"} />
+          <SubmitBar onPress={UpdateWorkout} buttonText={"Update"} />
         </ImageBackground>
         
         

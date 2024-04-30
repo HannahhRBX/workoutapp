@@ -54,8 +54,14 @@ export default function Workouts({ navigation }) {
     GetWorkouts();
   }, []);
 
+  const GetActivitiesFromWorkout = async (workout) => {
+    const initialWorkoutActivities = workout.workoutActivities;
+    setCreateWorkoutActivities(initialWorkoutActivities.map((activity) => ({ activity: activity.activityDetails, activityID: activity.activityID, duration: activity.duration, id: activity.id })));
+  }
+
   // Create and Manage Activity functions
   const Manage = async (workout) => {
+    await GetActivitiesFromWorkout(workout);
     navigation.navigate('ManageWorkout', { workout });
   }
 

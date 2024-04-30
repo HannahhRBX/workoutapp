@@ -41,7 +41,7 @@ export default function CreateWorkout({ navigation }) {
   // Add Activity to Workout
   const AddActivity = async () => {
     navigation.navigate('AddActivities', {
-      onConfirm: AddActivityToWorkout,
+      redirect:"CreateWorkout",
     });
   };
 
@@ -97,8 +97,8 @@ export default function CreateWorkout({ navigation }) {
 
   // Send to Manage Workout Activity Page
   const Manage = async (workoutActivity, index) => {
-    console.log("WorkoutActivity Management: ",workoutActivity,index);
-    navigation.navigate('ManageWorkoutActivity', { workoutActivity, index });
+    
+    navigation.navigate('ManageWorkoutActivity', { workoutActivity, index, redirect:"CreateWorkout" });
   }
 
   const onChange = (event, selectedDate) => {

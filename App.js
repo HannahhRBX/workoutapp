@@ -46,7 +46,7 @@ export default function App() {
 
     fetchUser();
   }, []);
-  console.log("User: ",user)
+  //console.log("User: ",user)
   if (loading) {
     return (
       <View style={styles.container}>
