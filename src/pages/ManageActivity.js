@@ -30,6 +30,7 @@ export default function ManageActivity({ navigation }) {
         },
         body: JSON.stringify({
           id,
+          userID: user.id,
           name,
           type,
           description,
@@ -39,6 +40,9 @@ export default function ManageActivity({ navigation }) {
       if (response.ok) {
         // If response ok, navigate back to activities page
         navigation.navigate('Activities');
+      }else{
+        const data = await response.json();
+        console.error('Failed to update the activity:', data);
       }
     } catch (error) {
       console.error('Failed to update the activity:', error);
@@ -176,6 +180,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: '800',
     marginBottom: 20,
+    textAlign: 'center',
   },
   topLeftButton: {
     position: 'absolute',

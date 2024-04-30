@@ -45,15 +45,40 @@ namespace WorkoutAPI.Controllers
 
         // PUT: api/Produc/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutActivityModel(int id, ActivityModel ActivityModel)
+        public class ActivityUpdateDTO
         {
-            if (id != ActivityModel.ID)
+            public int ID { get; set; }
+            public string UserID { get; set; }
+            public string Name { get; set; }
+            public string Type { get; set; }
+            public string Description { get; set; }
+        }
+
+        // Existing code...
+
+        // PUT: api/Produc/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutActivityModel(int id, [FromBody]ActivityUpdateDTO activityDTO)
+        {
+            if (id != activityDTO.ID)
             {
                 return BadRequest();
             }
 
-            _context.Entry(ActivityModel).State = EntityState.Modified;
+            var existingActivity = await _context.Activities.FindAsync(id);
+
+            if (existingActivity == null)
+            {
+                return NotFound();
+            }
+
+            existingActivity.UserID = activityDTO.UserID;
+            existingActivity.Name = activityDTO.Name;
+            existingActivity.Type = activityDTO.Type;
+            existingActivity.Description = activityDTO.Description;
+
+            _context.Entry(existingActivity).State = EntityState.Modified;
 
             try
             {

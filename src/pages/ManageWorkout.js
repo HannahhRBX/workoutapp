@@ -37,12 +37,7 @@ export default function ManageWorkout({ navigation }) {
   };
 
   const UpdateWorkoutActivities = async () => {
-    // Form validation to check for empty timestamp or activity array
-    if (createWorkoutActivities.length == 0){
-      alert('Please add at least one activity to the workout');
-      return;
-    }
-    
+       
     // GET request to retrieve the workout info from server
     const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
         method: 'GET',
@@ -139,7 +134,36 @@ export default function ManageWorkout({ navigation }) {
 
   console.log(createWorkoutActivities)
   // Function to delete the workout and its workoutActivities
-  
+  const DeleteWorkout = async () => {
+    // Delete workoutActivities
+    
+    createWorkoutActivities.forEach(workoutActivity => {
+      console.log("DELETING ACTIVITY: ", workoutActivity.id);
+      fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${workoutActivity.id}`, {
+        method: 'DELETE',
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        console.log(`Deleted activity with id ${workoutActivity.id}`);
+      })
+    });
+
+    // Delete workout
+    console.log("DELETING WORKOUT: ", id);
+    fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
+      method: 'DELETE',
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      console.log(`Deleted workout with id ${id}`);
+    })
+    navigation.navigate('Workouts');
+  }
+
 
   // Update a workout with new timestamp and its activities
   UpdateWorkout = async () => {
@@ -210,7 +234,9 @@ export default function ManageWorkout({ navigation }) {
             <View style={styles.topLeftButton}>
               <StyledButton title="" onPress={() => navigation.navigate('Workouts')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
             </View>
-            
+            <View style={styles.topRightButton}>
+              <StyledButton title="" onPress={DeleteWorkout} image={require('../../assets/Plus.png')} style={{ backgroundColor: '#e83f32', width: 50, height: 50, margin: 20, transform: [{ rotate: '45deg' }] }} fontSize={25}/>
+            </View>
           </View>
 
           {/* Container for all Activity widgets with scrollable content box */}
