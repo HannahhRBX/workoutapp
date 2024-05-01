@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { RefreshControl, StyleSheet, Text, View, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyledButton } from '../components/StyledButton';
 import { ImageBackground } from 'react-native';
@@ -15,7 +15,8 @@ export default function Activities({ navigation }) {
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [activities, setActivities] = useState([]);
-  
+  const [refreshing, setRefreshing] = React.useState(false);
+
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {
@@ -63,6 +64,12 @@ export default function Activities({ navigation }) {
       GetActivities();
     }, [])
   );
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    GetActivities().then(() => setRefreshing(false));
+  }, []);
+
   if (user) {
     
     return (
@@ -82,7 +89,11 @@ export default function Activities({ navigation }) {
 
           {/* Container for all Activity widgets with scrollable content box */}
           <View style={styles.innerContainer}>
-            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 200, minHeight: (320 * activities.length) + 200}}>
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 200, minHeight: (320 * activities.length) + 200}}
+              refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              >
               {activities.map((activity) => (
                 <ActivityWidget key={activity.id} onPress={() => Manage(activity)} activity={activity} buttonText={"Manage"} />
               ))}

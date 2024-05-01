@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { RefreshControl, StyleSheet, Text, View, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyledButton } from '../components/StyledButton';
 import { ImageBackground } from 'react-native';
@@ -17,7 +17,10 @@ export default function Workouts({ navigation }) {
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [workouts, setWorkouts] = useState([]);
+
+  
 
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
@@ -54,6 +57,8 @@ export default function Workouts({ navigation }) {
     GetWorkouts();
   }, []);
 
+  
+
   const GetActivitiesFromWorkout = async (workout) => {
     const initialWorkoutActivities = workout.workoutActivities;
     setCreateWorkoutActivities(initialWorkoutActivities.map((activity) => ({ activity: activity.activityDetails, activityID: activity.activityID, duration: activity.duration, id: activity.id })));
@@ -77,6 +82,13 @@ export default function Workouts({ navigation }) {
       GetWorkouts();
     }, [])
   );
+
+  // Refresh control for workouts
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    GetWorkouts().then(() => setRefreshing(false));
+  }, []);
+  
   if (user) {
     
     return (
@@ -96,7 +108,11 @@ export default function Workouts({ navigation }) {
 
           {/* Container for all Workout widgets with scrollable content box */}
           <View style={styles.innerContainer}>
-            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * workouts.length) + 200, minHeight: (320 * workouts.length) + 200}}>
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * workouts.length) + 200, minHeight: (320 * workouts.length) + 200}}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              >
               {workouts.map((workout) => (
                 <WorkoutWidget key={workout.id} onPress={() => Manage(workout)} workout={workout} buttonText={"Details"} />
               ))}
