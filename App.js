@@ -83,7 +83,18 @@ export default function App() {
           <Stack.Screen name="Welcome" component={Welcome} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
-          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Home" component={Home} options={{animationEnabled: false}} initialParams={{ user: user }} />
+          <Stack.Screen name="Workouts" component={Workouts} options={{animationEnabled: false}} initialParams={{ user: user }} />
+          <Stack.Screen name="CreateWorkout" component={CreateWorkout} initialParams={{ user: user }} />
+          <Stack.Screen name="ManageWorkout" component={ManageWorkout} initialParams={{ user: user }} />
+          <Stack.Screen name="ManageWorkoutActivity" component={ManageWorkoutActivity} initialParams={{ user: user }} />
+          <Stack.Screen name="AddActivities" component={AddActivities} initialParams={{ user: user }} />
+          <Stack.Screen name="Activities" component={Activities} options={{animationEnabled: false}} initialParams={{ user: user }} />
+          <Stack.Screen name="CreateActivity" component={CreateActivity} initialParams={{ user: user }} />
+          <Stack.Screen name="ManageActivity" component={ManageActivity} initialParams={{ user: user }} />
+          <Stack.Screen name="Welcome" component={Welcome} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Register" component={Register} />
         </Stack.Navigator>
       )}
       <StatusBar style="auto" />

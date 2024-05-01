@@ -23,8 +23,19 @@ export default function ManageWorkout({ navigation }) {
   const [timestamp, setTimestamp] = useState(initialTimestamp);
   const [date, setDate] = useState(new Date(Number(timestamp)));
   const [show, setShow] = useState(false);
+  const [stringStamp, setStringStamp] = useState('Select Date');
   console.log(id,userID,timestamp);
   
+
+  const CalculateTime = (time) => {
+    const timestampInt = parseInt(time, 10);
+    const dateFromTimestamp = new Date(timestampInt);
+    // Split date into weekday, day, month, and year
+    const day = dateFromTimestamp.toLocaleDateString('en-US', { day: '2-digit' });
+    const month = dateFromTimestamp.getMonth() + 1; // Months are 0-based in JavaScript
+    const year = dateFromTimestamp.toLocaleDateString('en-US', { year: 'numeric' });
+    setStringStamp(`${day}/${month < 10 ? '0' + month : month}/${year}`);
+  }
   // Delete user from local storage and navigate to welcome page
   
 
@@ -211,16 +222,23 @@ export default function ManageWorkout({ navigation }) {
   }
 
   const onChange = (event, selectedDate) => {
+    console.log(event)
     // Converts OS date format to javascript date format
     const currentDate = selectedDate || date;
     // Will close the date picker on iOS after selection
-    setShow(Platform.OS === 'ios');
+    setShow(Platform.OS === 'ios' ? true : false); // Change here
     setDate(currentDate);
     // Convert unix timestamp to string
-    const timestamp = date.getTime().toString();
-    setTimestamp(timestamp);
+    const timestamp = currentDate.getTime().toString();
+    setTimestamp(timestamp)
+    CalculateTime(timestamp);
   };
 
+  // Only run on page load to get workout Date
+  useEffect(() => {
+    CalculateTime(timestamp);
+  }, []);
+  
   
   if (user) {
     
@@ -243,15 +261,20 @@ export default function ManageWorkout({ navigation }) {
           
           <View style={styles.innerContainer}>
             <Text style={{...styles.header2, marginTop: 5}}>Workout Date</Text>
-            
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={date}
-              mode={'date'}
-              is24Hour={true}
-              display="default"
-              onChange={onChange}
-            />
+            {(show || Platform.OS === 'ios') && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={'date'}
+                is24Hour={true}
+                display="default"
+                onChange={onChange}
+              />
+            )}
+            {Platform.OS === 'android' && (
+              <StyledButton title={stringStamp} onPress={() => setShow(true)} style={{ backgroundColor: '#514eb5', width: 'auto', height: 50, margin: 20, borderRadius: 10 }} fontSize={19}/>
+              
+            )}
 
             {/* Iterate through all workout activities and create widgets in a scrollable list */}
             <Text style={styles.header2}>Workout Activities</Text>

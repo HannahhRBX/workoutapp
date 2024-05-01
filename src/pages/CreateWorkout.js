@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Platform } from 'react-native';
+import { Button, StyleSheet, Text, View, ScrollView, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyledButton } from '../components/StyledButton';
 import { ImageBackground } from 'react-native';
@@ -20,8 +20,20 @@ export default function CreateWorkout({ navigation }) {
   const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   const [date, setDate] = useState(new Date());
   const [timestamp, setTimestamp] = useState('');
+  const [stringStamp, setStringStamp] = useState('Select Date');
+
+  const CalculateTime = (time) => {
+    const timestampInt = parseInt(time, 10);
+    const dateFromTimestamp = new Date(timestampInt);
+    // Split date into weekday, day, month, and year
+    const day = dateFromTimestamp.toLocaleDateString('en-US', { day: '2-digit' });
+    const month = dateFromTimestamp.getMonth() + 1; // Months are 0-based in JavaScript
+    const year = dateFromTimestamp.toLocaleDateString('en-US', { year: 'numeric' });
+    setStringStamp(`${day}/${month < 10 ? '0' + month : month}/${year}`);
+  }
+
   const [show, setShow] = useState(false);
-  
+  console.log(show)
   // Get all activities from workout API
   const GetActivitiesFromWorkout = async () => {
     const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
@@ -102,14 +114,16 @@ export default function CreateWorkout({ navigation }) {
   }
 
   const onChange = (event, selectedDate) => {
+    console.log(event)
     // Converts OS date format to javascript date format
     const currentDate = selectedDate || date;
     // Will close the date picker on iOS after selection
-    setShow(Platform.OS === 'ios');
+    setShow(Platform.OS === 'ios' ? true : false); // Change here
     setDate(currentDate);
     // Convert unix timestamp to string
-    const timestamp = date.getTime().toString();
-    setTimestamp(timestamp);
+    const timestamp = currentDate.getTime().toString();
+    setTimestamp(timestamp)
+    CalculateTime(timestamp);
   };
 
   // Allows for the activities to be rerendered after navigating to different page
@@ -137,15 +151,22 @@ export default function CreateWorkout({ navigation }) {
           
           <View style={styles.innerContainer}>
             <Text style={{...styles.header2, marginTop: 5}}>Workout Date</Text>
+            {(show || Platform.OS === 'ios') && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={'date'}
+                is24Hour={true}
+                display="default"
+                onChange={onChange}
+              />
+            )}
+            {Platform.OS === 'android' && (
+              <StyledButton title={stringStamp} onPress={() => setShow(true)} style={{ backgroundColor: '#514eb5', width: 'auto', height: 50, margin: 20, borderRadius: 10 }} fontSize={19}/>
+              
+            )}
+
             
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={date}
-              mode={'date'}
-              is24Hour={true}
-              display="default"
-              onChange={onChange}
-            />
 
             {/* Iterate through all workout activities and create widgets in a scrollable list */}
             <Text style={styles.header2}>Workout Activities</Text>
