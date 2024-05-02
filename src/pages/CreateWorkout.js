@@ -36,18 +36,20 @@ export default function CreateWorkout({ navigation }) {
   console.log(show)
   // Get all activities from workout API
   const GetActivitiesFromWorkout = async () => {
-    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-    });
-    // If response ok, set activities to Activities state
-    if (response.ok){
-      const data = await response.json();
-     
+    if (user) {
+      const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`,
+          },
+      });
+      // If response ok, set activities to Activities state
+      if (response.ok){
+        const data = await response.json();
+      
+      }
     }
-
   } 
 
   // Add Activity to Workout
@@ -58,53 +60,57 @@ export default function CreateWorkout({ navigation }) {
   };
 
   const Create = async () => {
-    // Form validation to check for empty timestamp or activity array
-    if (createWorkoutActivities.length == 0){
-      alert('Please add at least one activity to the workout');
-      return;
-    }
-    if (timestamp == ''){
-      alert('Please select a date for the workout');
-      return;
-    }
-    // POST request to create a workout using userId with timestamp
-    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
-        method: 'POST',
-        body: JSON.stringify({
-          userID: user.id,
-          timestamp: timestamp,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-    });
-    // If response ok, create workout activities using newly created workout ID
-    if (response.ok){
-      const data = await response.json();
-      const workoutID = data.id;
-      // Iterate through activity state and create link table WorkoutActivity entries for each activity
-      createWorkoutActivities.forEach(async (activityItem) => {
-        const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity', {
+    if (user) {
+      // Form validation to check for empty timestamp or activity array
+      if (createWorkoutActivities.length == 0){
+        alert('Please add at least one activity to the workout');
+        return;
+      }
+      if (timestamp == ''){
+        alert('Please select a date for the workout');
+        return;
+      }
+      // POST request to create a workout using userId with timestamp
+      const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts', {
           method: 'POST',
           body: JSON.stringify({
-            workoutID: workoutID,
-            activityID: activityItem.activity.id,
-            duration: activityItem.duration,
+            userID: user.id,
+            timestamp: timestamp,
           }),
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`,
           },
-        });
-        if (response.ok){
-          const data = await response.json();
+      });
+      // If response ok, create workout activities using newly created workout ID
+      if (response.ok){
+        const data = await response.json();
+        const workoutID = data.id;
+        // Iterate through activity state and create link table WorkoutActivity entries for each activity
+        createWorkoutActivities.forEach(async (activityItem) => {
+          const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity', {
+            method: 'POST',
+            body: JSON.stringify({
+              workoutID: workoutID,
+              activityID: activityItem.activity.id,
+              duration: activityItem.duration,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user.token}`,
+            },
+          });
+          if (response.ok){
+            const data = await response.json();
+          }
         }
-      }
-      );
-    }else{
-      alert('Failed to create workout');
-    };
+        );
+      }else{
+        alert('Failed to create workout');
+      };
 
-    navigation.navigate('Workouts');
+      navigation.navigate('Workouts');
+    }
   };
 
   // Send to Manage Workout Activity Page

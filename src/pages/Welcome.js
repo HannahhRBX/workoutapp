@@ -8,28 +8,7 @@ import Background from '../../assets/Background2.png';
 // Welcome Page before Login/Registation
 export default function Welcome({ navigation }) {
 
-  // Send login function to API
-  const login = async () => {
-    let data = {
-      email: email,
-      password: password
-    };
-    // Get login response from API
-    const response = await fetch('https://localhost:7267/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    if(response.ok) {
-      const result = await response.json();
-      console.log("Login successful",result);
-    } else {
-      // handle error
-      
-    }
-  }
+  
 
   return (
     // Background to be replicated across app

@@ -48,55 +48,92 @@ export default function ManageWorkout({ navigation }) {
   };
 
   const UpdateWorkoutActivities = async () => {
-       
-    // GET request to retrieve the workout info from server
-    const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-    });
-    // If response ok, compare the workout from server to the workout in state
-    if (response.ok){
-      const data = await response.json();
-      const serverWorkoutActivities = data.workoutActivities;
-      const stateWorkoutActivities = createWorkoutActivities;
-      const workoutID = data.id;
-      console.log("Workout DATA: ",serverWorkoutActivities);
-      console.log("\nState DATA: ",stateWorkoutActivities);
+    if (user) {
+      // GET request to retrieve the workout info from server
+      const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`,
+          },
+      });
+      // If response ok, compare the workout from server to the workout in state
+      if (response.ok){
+        const data = await response.json();
+        const serverWorkoutActivities = data.workoutActivities;
+        const stateWorkoutActivities = createWorkoutActivities;
+        const workoutID = data.id;
+        console.log("Workout DATA: ",serverWorkoutActivities);
+        console.log("\nState DATA: ",stateWorkoutActivities);
 
-      // If the server workout has activities
-      if (data.workoutActivities){
-        // Function to check if server has activities that client does not
-        serverWorkoutActivities.forEach(serverActivity => {
-          // If the server activity is not in the state activities, delete the activity from the server
-          const stateActivity = stateWorkoutActivities.find(stateActivity => stateActivity.id === serverActivity.id);
-          if (!stateActivity) {
-            // Send DELETE request
-            console.log("DELETING: ", serverActivity.id);
-            fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${serverActivity.id}`, {
-              method: 'DELETE',
-            })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              console.log(`Deleted activity with id ${serverActivity.id}`);
-            })
-          } else {
-            // Send PUT request to update the workoutActivity data
-            console.log("UPDATING: ", serverActivity.id, stateActivity.duration, stateActivity.activityID);
-            fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${serverActivity.id}`, {
-              method: 'PUT',
+        // If the server workout has activities
+        if (data.workoutActivities){
+          // Function to check if server has activities that client does not
+          serverWorkoutActivities.forEach(serverActivity => {
+            // If the server activity is not in the state activities, delete the activity from the server
+            const stateActivity = stateWorkoutActivities.find(stateActivity => stateActivity.id === serverActivity.id);
+            if (!stateActivity) {
+              // Send DELETE request
+              console.log("DELETING: ", serverActivity.id);
+              fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${serverActivity.id}`, {
+                  method: 'DELETE',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${user.token}`,
+                  },
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                console.log(`Deleted activity with id ${serverActivity.id}`);
+              })
+            } else {
+              // Send PUT request to update the workoutActivity data
+              console.log("UPDATING: ", serverActivity.id, stateActivity.duration, stateActivity.activityID);
+              fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${serverActivity.id}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${user.token}`,
+                },
+                body: JSON.stringify({
+                  id: stateActivity.id,
+                  workoutID: workoutID,
+                  activityID: stateActivity.activityID,
+                  duration: stateActivity.duration,
+                  
+                  
+                }),
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                console.log(`Updated activity with id ${serverActivity.id}`);
+              })
+            }
+          });
+        }
+
+        // Function to check if state has activities that the server does not
+        stateWorkoutActivities.forEach(stateActivity => {
+          // If the state activity is not in the server activities, create the activity on the server
+          const serverActivity = serverWorkoutActivities.find(serverActivity => serverActivity.id === stateActivity.id);
+          if (!serverActivity) {
+            // Send POST request to create new workoutActivity
+            console.log("CREATING: ", stateActivity.duration, stateActivity.activity.id);
+            fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity', {
+              method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.token}`,
               },
               body: JSON.stringify({
-                id: stateActivity.id,
-                workoutID: workoutID,
-                activityID: stateActivity.activityID,
-                duration: stateActivity.duration,
-                
+
+                  workoutID: workoutID,
+                  activityID: stateActivity.activity.id,
+                  duration: stateActivity.duration,
                 
               }),
             })
@@ -104,112 +141,98 @@ export default function ManageWorkout({ navigation }) {
               if (!response.ok) {
                 throw new Error('Network response was not ok');
               }
-              console.log(`Updated activity with id ${serverActivity.id}`);
+              console.log(`Created workout activity with activity id ${stateActivity.activity.id} and workout id ${workoutID}`);
             })
           }
         });
-      }
-
-      // Function to check if state has activities that the server does not
-      stateWorkoutActivities.forEach(stateActivity => {
-        // If the state activity is not in the server activities, create the activity on the server
-        const serverActivity = serverWorkoutActivities.find(serverActivity => serverActivity.id === stateActivity.id);
-        if (!serverActivity) {
-          // Send POST request to create new workoutActivity
-          console.log("CREATING: ", stateActivity.duration, stateActivity.activity.id);
-          fetch('https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-
-                workoutID: workoutID,
-                activityID: stateActivity.activity.id,
-                duration: stateActivity.duration,
-              
-            }),
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            console.log(`Created workout activity with activity id ${stateActivity.activity.id} and workout id ${workoutID}`);
-          })
-        }
-      });
-      
-      navigation.navigate('Workouts');
-    };
+        
+        navigation.navigate('Workouts');
+      };
+    }
   }
 
   console.log(createWorkoutActivities)
   // Function to delete the workout and its workoutActivities
   const DeleteWorkout = async () => {
-    // Delete workoutActivities
-    
-    createWorkoutActivities.forEach(workoutActivity => {
-      console.log("DELETING ACTIVITY: ", workoutActivity.id);
-      fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${workoutActivity.id}`, {
+    if (user) {
+      // Delete workoutActivities
+      
+      createWorkoutActivities.forEach(workoutActivity => {
+        console.log("DELETING ACTIVITY: ", workoutActivity.id);
+        fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${workoutActivity.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`,
+          },
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          console.log(`Deleted activity with id ${workoutActivity.id}`);
+        })
+      });
+
+      // Delete workout
+      console.log("DELETING WORKOUT: ", id);
+      fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`,
+        },
       })
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        console.log(`Deleted activity with id ${workoutActivity.id}`);
+        console.log(`Deleted workout with id ${id}`);
       })
-    });
-
-    // Delete workout
-    console.log("DELETING WORKOUT: ", id);
-    fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
-      method: 'DELETE',
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      console.log(`Deleted workout with id ${id}`);
-    })
-    navigation.navigate('Workouts');
+      navigation.navigate('Workouts');
+    }
   }
 
 
   // Update a workout with new timestamp and its activities
   UpdateWorkout = async () => {
     try{
-      // Catch form validation for empty timestamp
-      if (timestamp == ''){
-        alert('Please select a date for the workout');
-        return;
-      }
-      // PUT request to update workout info on server
-      const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          params: {
-            id,
-          },
-          body: JSON.stringify({
-            id,
-            userID,
-            timestamp,
-          }),
-      });
-      // If response ok, create workout activities using newly created workout ID
-      if (response.ok){  
-        console.log(id);
-        UpdateWorkoutActivities();
-        
+        if (user) {
+        // Catch form validation for empty timestamp
+        if (timestamp == ''){
+          alert('Please select a date for the workout');
+          return;
+        }
+        // PUT request to update workout info on server
+        const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user.token}`,
+            },
+            params: {
+              id,
+            },
+            body: JSON.stringify({
+              id,
+              userID,
+              timestamp,
+            }),
+        });
+        // If response ok, create workout activities using newly created workout ID
+        if (response.ok){  
+          console.log(id);
+          UpdateWorkoutActivities();
+          
+        }else{
+          // If response not ok, alert user
+          const data = await response.json();
+          console.log(data);
+          alert('Failed to create workout',id);
+        };
       }else{
-        // If response not ok, alert user
-        const data = await response.json();
-        console.log(data);
-        alert('Failed to create workout',id);
-      };
+        console.error('User not found');
+      }
     }catch (error){
       console.error('Failed to update the workout:', error);
     }

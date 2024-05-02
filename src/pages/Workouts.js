@@ -32,24 +32,32 @@ export default function Workouts({ navigation }) {
     }
   }
 
+
   // Get all workouts by UserID from workout API
   const GetWorkouts = async () => {
-    
-    const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/user/${user.id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-    });
-    // If response ok, set retrieved workouts to workouts state
-    if (response.ok){
-      const data = await response.json();
-      setWorkouts(data);
-    }else{
-      const data = await response.json();
-      
+    try {
+      if (user) {
+        const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/user/${user.id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user.token}`,
+            },
+        });
+        // If response ok, set retrieved workouts to workouts state
+        if (response.ok){
+          const data = await response.json();
+          setWorkouts(data);
+        }else{
+          const data = await response.json();
+          
+        }
+      } else {
+        console.error('User not found');
+      }
+    } catch (error) {
+      console.error(error);
     }
-
   }
 
   // Refresh on reload after managing or creating a workout

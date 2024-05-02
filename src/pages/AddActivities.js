@@ -30,18 +30,20 @@ export default function AddActivities({ navigation }) {
 
   // Get all activities from workout API
   const GetActivities = async () => {
-    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/activities', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-    });
-    // If response ok, set activities to Activities state
-    if (response.ok){
-      const data = await response.json();
-      setActivities(data);
+    if (user) {
+      const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/activities', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`,
+          },
+      });
+      // If response ok, set activities to Activities state
+      if (response.ok){
+        const data = await response.json();
+        setActivities(data);
+      }
     }
-
   }
 
   // Refresh on reload after managing or creating an activity

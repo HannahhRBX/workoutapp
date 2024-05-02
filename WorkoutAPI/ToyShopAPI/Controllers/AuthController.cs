@@ -112,18 +112,19 @@ namespace WorkoutAPI.Controllers
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                //Subject = new ClaimsIdentity(new Claim[]
-                //{
-                //    new Claim(ClaimTypes.Name, identityUser.UserName.ToString()),
-                //    new Claim(ClaimTypes.Email, identityUser.Email)
-                //}),
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, identityUser.UserName.ToString()),
+                    new Claim(ClaimTypes.Email, identityUser.Email),
+                    new Claim(ClaimTypes.NameIdentifier, identityUser.Id.ToString())
+                }),
 
                 Expires = DateTime.UtcNow.AddSeconds(jwtBearerTokenSettings.ExpiryTimeInSeconds),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
                 Audience = jwtBearerTokenSettings.Audience,
                 Issuer = jwtBearerTokenSettings.Issuer
             };
-            Console.WriteLine("Hello");
+
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }

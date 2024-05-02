@@ -23,26 +23,29 @@ export default function ManageActivity({ navigation }) {
   // Submit Activity changes to API
   const Submit = async () => {
     try {
-      const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/activities/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id,
-          userID: user.id,
-          name,
-          type,
-          description,
-        }),
-      });
-  
-      if (response.ok) {
-        // If response ok, navigate back to activities page
-        navigation.navigate('Activities');
-      }else{
-        const data = await response.json();
-        console.error('Failed to update the activity:', data);
+        if (user) {
+        const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/activities/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({
+            id,
+            userID: user.id,
+            name,
+            type,
+            description,
+          }),
+        });
+    
+        if (response.ok) {
+          // If response ok, navigate back to activities page
+          navigation.navigate('Activities');
+        }else{
+          const data = await response.json();
+          console.error('Failed to update the activity:', data);
+        }
       }
     } catch (error) {
       console.error('Failed to update the activity:', error);
@@ -52,16 +55,19 @@ export default function ManageActivity({ navigation }) {
   // Delete Activity from API
   const Delete = async () => {
     try {
-      const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/activities/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      if (user) {
+        const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/activities/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`,
+          },
+        });
 
-      // If response ok, navigate back to activities page
-      if (response.ok) {
-        navigation.navigate('Activities');
+        // If response ok, navigate back to activities page
+        if (response.ok) {
+          navigation.navigate('Activities');
+        }
       }
     }
     catch (error) {

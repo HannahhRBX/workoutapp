@@ -16,24 +16,27 @@ export default function CreateActivity({ navigation }) {
   
   // Create activity through API
   const CreateActivity = async () => {
-    const data = {
-      userID: user.id,
-      name: name,
-      type: type,
-      description: description,
-    };
-    const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/activities', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    let result = await response.json();
-    
-    if(response.ok) {
-      // If response ok, navigate back to activities page
-      navigation.navigate('Activities');
+    if (user) {
+      const data = {
+        userID: user.id,
+        name: name,
+        type: type,
+        description: description,
+      };
+      const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/activities', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`,
+        },
+      });
+      let result = await response.json();
+      
+      if(response.ok) {
+        // If response ok, navigate back to activities page
+        navigation.navigate('Activities');
+      }
     }
   }
 

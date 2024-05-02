@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using System;
+using System.Security.Claims;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,11 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkoutAPI.Data;
 using WorkoutAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WorkoutAPI.Controllers
 {
     [Route("api/activities")]
     [ApiController]
+    [Authorize]
     public class ActivitiesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -43,8 +46,9 @@ namespace WorkoutAPI.Controllers
             return ActivityModel;
         }
 
-        // PUT: api/Produc/5
+        
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // DTO for updating an existing activity
         public class ActivityUpdateDTO
         {
             public int ID { get; set; }
@@ -73,7 +77,19 @@ namespace WorkoutAPI.Controllers
                 return NotFound();
             }
 
-            existingActivity.UserID = activityDTO.UserID;
+            // Get the user's ID from the User property
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Console.WriteLine("UserID: {0}, ExistingActivity.UserID: {1}", userId, existingActivity.UserID);
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine("Claim Type: {0}, Claim Value: {1}", claim.Type, claim.Value);
+            }
+            // Check if the user is authorized to update the activity
+            if (userId != existingActivity.UserID)
+            {
+                return Forbid();
+            }
+
             existingActivity.Name = activityDTO.Name;
             existingActivity.Type = activityDTO.Type;
             existingActivity.Description = activityDTO.Description;
@@ -99,6 +115,7 @@ namespace WorkoutAPI.Controllers
             return NoContent();
         }
 
+        // DTO for creating a new activity
         public class ActivityModelDTO
         {
             public string UserID { get; set; }
@@ -112,6 +129,19 @@ namespace WorkoutAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ActivityModel>> PostActivityModel(ActivityModelDTO activityModelDTO)
         {
+            // Get the user's ID from the User property
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Console.WriteLine("UserID: {0}", userId);
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine("Claim Type: {0}, Claim Value: {1}", claim.Type, claim.Value);
+            }
+            // Check if the user is authorized to create the activity
+            if (userId != activityModelDTO.UserID)
+            {
+                return Forbid();
+            }
+
             var activityModel = new ActivityModel
             {
                 UserID = activityModelDTO.UserID,
@@ -131,13 +161,22 @@ namespace WorkoutAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteActivityModel(int id)
         {
-            var ActivityModel = await _context.Activities.FindAsync(id);
-            if (ActivityModel == null)
+            var activityModel = await _context.Activities.FindAsync(id);
+            if (activityModel == null)
             {
                 return NotFound();
             }
 
-            _context.Activities.Remove(ActivityModel);
+            // Get the user's ID from the User property
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Check if the user is authorized to delete the activity
+            if (userId != activityModel.UserID)
+            {
+                return Forbid();
+            }
+
+            _context.Activities.Remove(activityModel);
             await _context.SaveChangesAsync();
 
             return NoContent();
