@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { RefreshControl, StyleSheet, Text, View, Button, TextInput, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyledButton } from '../components/StyledButton';
 import { ImageBackground } from 'react-native';
@@ -7,13 +7,18 @@ import Background from '../../assets/Background2.png';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
+import WorkoutGraph from '../components/WorkoutGraphWidget';
 
 // Registration Page
 export default function Home({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
-
+  const [workouts, setWorkouts] = useState([]);
+  const [refreshing, setRefreshing] = React.useState(false);
+  workouts.map((workout, index) => {
+    console.log(workout);
+  });
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {
@@ -23,6 +28,55 @@ export default function Home({ navigation }) {
       console.error(e);
     }
   }
+
+  // Get all workouts by UserID from workout API
+  const GetWorkouts = async () => {
+    try {
+      if (user) {
+        const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/user/${user.id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user.token}`,
+            },
+        });
+        // If response ok, set retrieved workouts to workouts state
+        if (response.ok){
+          const text = await response.text();
+          if (!text) {
+            console.log('No data returned from the server');
+            setWorkouts([]);
+          } else {
+            const data = JSON.parse(text);
+            setWorkouts(data);
+          }
+        }else{
+          const text = await response.text();
+          if (!text) {
+            console.log('No data returned from the server');
+          } else {
+            const data = JSON.parse(text);
+            console.log(data);
+          }
+        }
+      } else {
+        console.error('User not found');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // Refresh on reload after managing or creating a workout
+  useEffect(() => {
+    GetWorkouts();
+  }, []);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    GetWorkouts().then(() => setRefreshing(false));
+  }, []);
+
   // Allows for the navigation bar to be rerendered after navigating to a different page
   useFocusEffect(
     React.useCallback(() => {
@@ -36,17 +90,25 @@ export default function Home({ navigation }) {
       <>
         <ImageBackground source={Background} style={styles.container}>
           {/* Form and buttons for navigation */}
-          <View style={styles.container}>
+          <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
+          <Text style={styles.header}>Home</Text>
             <View style={styles.topLeftButton}>
               <StyledButton title="" onPress={logoutUser} image={require('../../assets/Logout.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
             </View>
-            <View style={styles.innerContainer}>
-            <View style={styles.widgetContainer}>
-            <Text style={styles.header}>Hi, {user.firstName}</Text>
-            <Text style={styles.header2}>Let's get working!</Text>
-            </View>
+            
+            </ImageBackground>
+          <View style={styles.innerContainer}>
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (830 ) + 200, minHeight: (830) + 200, width: 370}}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              >
+              <WorkoutGraph workouts={workouts} days={7} />
+              <WorkoutGraph workouts={workouts} days={30} />
+              
+
+            </ScrollView>
           </View>
-        </View>
       </ImageBackground>
       <NavigationBar onSelect={navigation.navigate} currentPage={selectedTab} />
       </>
@@ -79,6 +141,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
+    zIndex: 1,
   },
   widgetContainer: {
     flex: 1,
@@ -99,9 +162,13 @@ const styles = StyleSheet.create({
     fontSize: 18, 
   },
   header: {
-    fontSize: 35,
-    fontWeight: '700',
-    marginBottom: 0,
+    fontSize: 30,
+    fontWeight: '600',
+    color: '#2f2f2f',
+    textAlign: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 57,
   },
   header2: {
     fontSize: 24,
@@ -112,6 +179,25 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 30,
     left: 0,
-    zIndex: 5,
+    zIndex: 15,
+  },
+  topBar: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth:'100%',
+    overflow: 'visible',
+    zIndex: 6,
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+    height: 120,
+    borderBottomWidth: 0,
+    borderBottomColor: '#e0e0e0',
+    shadowColor: '#868686',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4.84,
+    elevation: 5,
   },
 });

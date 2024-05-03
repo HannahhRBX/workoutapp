@@ -46,11 +46,22 @@ export default function Workouts({ navigation }) {
         });
         // If response ok, set retrieved workouts to workouts state
         if (response.ok){
-          const data = await response.json();
-          setWorkouts(data);
+          const text = await response.text();
+          if (!text) {
+            console.log('No data returned from the server');
+            setWorkouts([]);
+          } else {
+            const data = JSON.parse(text);
+            setWorkouts(data);
+          }
         }else{
-          const data = await response.json();
-          
+          const text = await response.text();
+          if (!text) {
+            console.log('No data returned from the server');
+          } else {
+            const data = JSON.parse(text);
+            console.log(data);
+          }
         }
       } else {
         console.error('User not found');

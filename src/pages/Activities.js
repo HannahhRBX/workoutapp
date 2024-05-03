@@ -40,12 +40,22 @@ export default function Activities({ navigation }) {
         });
         // If response ok, set activities to Activities state
         if (response.ok){
-          const data = await response.json();
-          setActivities(data);
+          const text = await response.text();
+          if (!text) {
+            console.log('No data returned from the server');
+            setActivities([]);
+          } else {
+            const data = JSON.parse(text);
+            setActivities(data);
+          }
         }else{
-          const data = await response.json();
-          console.error('Failed to get activities:', data);
-        
+          const text = await response.text();
+          if (!text) {
+            console.log('No data returned from the server');
+          } else {
+            const data = JSON.parse(text);
+            console.error('Failed to get activities:', data);
+          }
         }
       }
     } catch (error) {
