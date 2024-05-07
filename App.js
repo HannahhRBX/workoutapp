@@ -7,6 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { StyledButton } from './src/components/StyledButton';
 import { retrieveUser } from './src/Storage';
 import { CreateWorkoutActivityContext } from './CreateWorkoutActivityContext';
+import { UserContext } from './UserContext';
 import SelectedTabContext from './SelectedTabContext';
 import Login from './src/pages/Login';
 import Register from './src/pages/Register';
@@ -22,10 +23,11 @@ import CreateActivity from './src/pages/CreateActivity';
 import ManageWorkoutActivity from './src/pages/ManageWorkoutActivity';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const Stack = createStackNavigator();
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState([]);
   const [loading, setLoading] = useState(true); 
   const [selectedTab, setSelectedTab] = useState('Home');
   const [createWorkoutActivities, setCreateWorkoutActivities] = useState([]);
@@ -38,16 +40,16 @@ export default function App() {
       }
       setLoading(false);
     };
-
     fetchUser();
-  }, [user]);
-
+  }, [selectedTab]);
+  
   const logoutUser = async () => {
     try {
       await AsyncStorage.removeItem('user');
       setCreateWorkoutActivities([]);
-      setUser(null);
+      setUser([]);
       setLoading(false);
+      
     } catch(e) {
       console.error(e);
     }
@@ -63,46 +65,48 @@ export default function App() {
   }
 
   return (
-    <CreateWorkoutActivityContext.Provider value={[ createWorkoutActivities, setCreateWorkoutActivities ]}>
-      <SelectedTabContext.Provider value={{ selectedTab, setSelectedTab }}>
-        <NavigationContainer>
-          {user ? (
-            <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
-              {/* The screens to show when the user is logged in */}
-              <Stack.Screen name="Home" component={Home} options={{animationEnabled: false}} initialParams={{ user: user }} />
-              <Stack.Screen name="Workouts" component={Workouts} options={{animationEnabled: false}} initialParams={{ user: user }} />
-              <Stack.Screen name="CreateWorkout" component={CreateWorkout} initialParams={{ user: user }} />
-              <Stack.Screen name="ManageWorkout" component={ManageWorkout} initialParams={{ user: user }} />
-              <Stack.Screen name="ManageWorkoutActivity" component={ManageWorkoutActivity} initialParams={{ user: user }} />
-              <Stack.Screen name="AddActivities" component={AddActivities} initialParams={{ user: user }} />
-              <Stack.Screen name="Activities" component={Activities} options={{animationEnabled: false}} initialParams={{ user: user }} />
-              <Stack.Screen name="CreateActivity" component={CreateActivity} initialParams={{ user: user }} />
-              <Stack.Screen name="ManageActivity" component={ManageActivity} initialParams={{ user: user }} />
-              <Stack.Screen name="Welcome" component={Welcome} />
-              <Stack.Screen name="Login" component={Login} />
-              <Stack.Screen name="Register" component={Register} />
-            </Stack.Navigator>
-          ) : (
-            <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
-              {/* The screens to show when the user is not logged in */}
-              <Stack.Screen name="Welcome" component={Welcome} />
-              <Stack.Screen name="Login" component={Login} />
-              <Stack.Screen name="Register" component={Register} />
-              <Stack.Screen name="Home" component={Home} options={{animationEnabled: false}} initialParams={{ user: user }} />
-              <Stack.Screen name="Workouts" component={Workouts} options={{animationEnabled: false}} initialParams={{ user: user }} />
-              <Stack.Screen name="CreateWorkout" component={CreateWorkout} initialParams={{ user: user }} />
-              <Stack.Screen name="ManageWorkout" component={ManageWorkout} initialParams={{ user: user }} />
-              <Stack.Screen name="ManageWorkoutActivity" component={ManageWorkoutActivity} initialParams={{ user: user }} />
-              <Stack.Screen name="AddActivities" component={AddActivities} initialParams={{ user: user }} />
-              <Stack.Screen name="Activities" component={Activities} options={{animationEnabled: false}} initialParams={{ user: user }} />
-              <Stack.Screen name="CreateActivity" component={CreateActivity} initialParams={{ user: user }} />
-              <Stack.Screen name="ManageActivity" component={ManageActivity} initialParams={{ user: user }} />
-            </Stack.Navigator>
-          )}
-          <StatusBar style="auto" />
-        </NavigationContainer>
-      </SelectedTabContext.Provider>
-    </CreateWorkoutActivityContext.Provider>
+    <UserContext.Provider value={[ user, setUser ]}>
+      <CreateWorkoutActivityContext.Provider value={[ createWorkoutActivities, setCreateWorkoutActivities ]}>
+        <SelectedTabContext.Provider value={{ selectedTab, setSelectedTab }}>
+          <NavigationContainer>
+            {user != [] ? (
+              <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
+                {/* The screens to show when the user is logged in */}
+                <Stack.Screen name="Home" component={Home} options={{animationEnabled: false}} initialParams={{ user: user }} />
+                <Stack.Screen name="Workouts" component={Workouts} options={{animationEnabled: false}} initialParams={{ user: user }} />
+                <Stack.Screen name="CreateWorkout" component={CreateWorkout} initialParams={{ user: user }} />
+                <Stack.Screen name="ManageWorkout" component={ManageWorkout} initialParams={{ user: user }} />
+                <Stack.Screen name="ManageWorkoutActivity" component={ManageWorkoutActivity} initialParams={{ user: user }} />
+                <Stack.Screen name="AddActivities" component={AddActivities} initialParams={{ user: user }} />
+                <Stack.Screen name="Activities" component={Activities} options={{animationEnabled: false}} initialParams={{ user: user }} />
+                <Stack.Screen name="CreateActivity" component={CreateActivity} initialParams={{ user: user }} />
+                <Stack.Screen name="ManageActivity" component={ManageActivity} initialParams={{ user: user }} />
+                <Stack.Screen name="Welcome" component={Welcome} />
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Register" component={Register} />
+              </Stack.Navigator>
+            ) : (
+              <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
+                {/* The screens to show when the user is not logged in */}
+                <Stack.Screen name="Welcome" component={Welcome} />
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Register" component={Register} />
+                <Stack.Screen name="Home" component={Home} options={{animationEnabled: false}} initialParams={{ user: user }} />
+                <Stack.Screen name="Workouts" component={Workouts} options={{animationEnabled: false}} initialParams={{ user: user }} />
+                <Stack.Screen name="CreateWorkout" component={CreateWorkout} initialParams={{ user: user }} />
+                <Stack.Screen name="ManageWorkout" component={ManageWorkout} initialParams={{ user: user }} />
+                <Stack.Screen name="ManageWorkoutActivity" component={ManageWorkoutActivity} initialParams={{ user: user }} />
+                <Stack.Screen name="AddActivities" component={AddActivities} initialParams={{ user: user }} />
+                <Stack.Screen name="Activities" component={Activities} options={{animationEnabled: false}} initialParams={{ user: user }} />
+                <Stack.Screen name="CreateActivity" component={CreateActivity} initialParams={{ user: user }} />
+                <Stack.Screen name="ManageActivity" component={ManageActivity} initialParams={{ user: user }} />
+              </Stack.Navigator>
+            )}
+            <StatusBar style="auto" />
+          </NavigationContainer>
+        </SelectedTabContext.Provider>
+      </CreateWorkoutActivityContext.Provider>
+    </UserContext.Provider>
   );
 }
 

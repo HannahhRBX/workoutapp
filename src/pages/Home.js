@@ -11,11 +11,11 @@ import WorkoutGraph from '../components/WorkoutGraphWidget';
 import WorkoutAverage from '../components/WorkoutAverageWidget';
 import WorkoutPieChart from '../components/WorkoutPieChartWidget';
 import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
+import { UserContext } from '../../UserContext';
 
 // Registration Page
 export default function Home({ navigation }) {
-  const route = useRoute();
-  let user = route.params?.user || null;
+  const [user, setUser] = useContext(UserContext);
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   const [workouts, setWorkouts] = useState([]);
@@ -26,7 +26,11 @@ export default function Home({ navigation }) {
     try {
       await AsyncStorage.removeItem('user');
       setCreateWorkoutActivities([]);
-      navigation.navigate('Welcome');
+      setUser([]);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      });
     } catch(e) {
       console.error(e);
     }

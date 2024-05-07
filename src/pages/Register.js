@@ -10,6 +10,7 @@ export default function Register({ navigation }) {
   const [lastName, setlastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorText, setErrorText] = useState('');
   
 
   // Send login function to API
@@ -37,6 +38,14 @@ export default function Register({ navigation }) {
     } else {
       // handle error
       const result = await response.json();
+      const firstErrorKey = Object.keys(result.errors)[0];
+      const firstErrorMessage = result.errors[firstErrorKey][0];
+      setErrorText(firstErrorMessage);
+      console.log(firstErrorMessage);
+      console.log(result);
+      if (!firstErrorMessage) {
+        setErrorText("Password does not meet requirements. Please try again.");
+      }
     }
   }
   
@@ -76,7 +85,7 @@ export default function Register({ navigation }) {
             placeholder="Password"
             secureTextEntry
           />
-          
+          <Text style={styles.error}>{errorText}</Text>
           <StyledButton title="Register" onPress={login} style={{ backgroundColor: '#514eb5', width: 230, height: 50, margin: 20 }} fontSize={20} />
           
         </View>
@@ -117,6 +126,14 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: '800',
     marginBottom: 20,
+  },
+  error: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 0,
+    color: 'red',
+    textAlign: 'center',
+    width: 320,
   },
   topLeftButton: {
     position: 'absolute',

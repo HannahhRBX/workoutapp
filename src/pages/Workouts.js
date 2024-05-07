@@ -9,25 +9,27 @@ import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
 import WorkoutWidget from '../components/WorkoutWidget';
 import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
+import { UserContext } from '../../UserContext';
 
 // Workouts Page
 export default function Workouts({ navigation }) {
-  const route = useRoute();
   // Use route params to get user
-  let user = route.params?.user || null;
+  const [user, setUser] = useContext(UserContext);
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   const [refreshing, setRefreshing] = React.useState(false);
   const [workouts, setWorkouts] = useState([]);
-
-  
 
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {
       await AsyncStorage.removeItem('user');
       setCreateWorkoutActivities([]);
-      navigation.navigate('Welcome');
+      setUser([]);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      });
     } catch(e) {
       console.error(e);
     }
@@ -75,6 +77,7 @@ export default function Workouts({ navigation }) {
 
   // Refresh on reload after managing or creating a workout
   useEffect(() => {
+    setCreateWorkoutActivities([]);
     GetWorkouts();
   }, []);
 
@@ -99,11 +102,14 @@ export default function Workouts({ navigation }) {
   useFocusEffect(
     React.useCallback(() => {
       setCreateWorkoutActivities([]);
-      setSelectedTab('Workouts');
-      GetWorkouts();
-    }, [])
+      if (user) {
+        setSelectedTab('Workouts');
+        GetWorkouts();
+      }
+    }, []) // Only re-run the effect if `user` changes
   );
 
+  
   // Refresh control for workouts
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);

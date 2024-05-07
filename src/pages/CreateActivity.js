@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput} from 'react-native';
+import { StyleSheet, Text, View, TextInput, Platform } from 'react-native';
 import { StyledButton } from '../components/StyledButton';
 import { ImageBackground, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import Background from '../../assets/Background2.png';
@@ -47,44 +47,84 @@ export default function CreateActivity({ navigation }) {
       // Background to be replicated across app
       <ImageBackground source={Background} style={styles.container}>
         {/* Element to allow tapping on background to close keyboard */}
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.container}>
-            <View style={styles.topLeftButton}>
-              <StyledButton title="" onPress={() => navigation.navigate('Activities')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
-            </View>
-            {/* Form and buttons for navigation */}
-            <View style={styles.innerContainer}>
-              <Text style={styles.header}>Create Activity</Text>
+        {
+          Platform.OS === 'web' ? 
+            <View style={styles.container}>
+              <View style={styles.topLeftButton}>
+                <StyledButton title="" onPress={() => navigation.navigate('Activities')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+              </View>
+              {/* Form and buttons for navigation */}
+              <View style={styles.innerContainer}>
+                <Text style={styles.header}>Create Activity</Text>
 
-              <Text style={styles.title}>Name</Text> 
-              <TextInput
-                style={styles.input}
-                onChangeText={setName}
-                value={name}
-                placeholder="Name"
-              />
-            
-              <Text style={styles.title}>Type</Text>
-              <TextInput
+                <Text style={styles.title}>Name</Text> 
+                <TextInput
                   style={styles.input}
-                  onChangeText={setType}
-                  value={type}
-                  placeholder="Type"
-              />
-              <Text style={styles.title}>Description</Text>
-              <TextInput
-                style={styles.input2}
-                onChangeText={setDescription}
-                value={description}
-                placeholder="Description"
-                multiline={true}
-                numberOfLines={5}
-              />
+                  onChangeText={setName}
+                  value={name}
+                  placeholder="Name"
+                />
+              
+                <Text style={styles.title}>Type</Text>
+                <TextInput
+                    style={styles.input}
+                    onChangeText={setType}
+                    value={type}
+                    placeholder="Type"
+                />
+                <Text style={styles.title}>Description</Text>
+                <TextInput
+                  style={styles.input2}
+                  onChangeText={setDescription}
+                  value={description}
+                  placeholder="Description"
+                  multiline={true}
+                  numberOfLines={5}
+                />
 
-              <StyledButton title="Create" onPress={CreateActivity} style={{ backgroundColor: '#514eb5', width: 230, height: 50, margin: 20 }} fontSize={20} />
+                <StyledButton title="Create" onPress={CreateActivity} style={{ backgroundColor: '#514eb5', width: 230, height: 50, margin: 20 }} fontSize={20} />
+              </View>
             </View>
-          </View>
-        </TouchableWithoutFeedback>
+          :
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={styles.container}>
+                <View style={styles.topLeftButton}>
+                  <StyledButton title="" onPress={() => navigation.navigate('Activities')} image={require('../../assets/Back.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+                </View>
+                {/* Form and buttons for navigation */}
+                <View style={styles.innerContainer}>
+                  <Text style={styles.header}>Create Activity</Text>
+
+                  <Text style={styles.title}>Name</Text> 
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={setName}
+                    value={name}
+                    placeholder="Name"
+                  />
+                
+                  <Text style={styles.title}>Type</Text>
+                  <TextInput
+                      style={styles.input}
+                      onChangeText={setType}
+                      value={type}
+                      placeholder="Type"
+                  />
+                  <Text style={styles.title}>Description</Text>
+                  <TextInput
+                    style={styles.input2}
+                    onChangeText={setDescription}
+                    value={description}
+                    placeholder="Description"
+                    multiline={true}
+                    numberOfLines={5}
+                  />
+
+                  <StyledButton title="Create" onPress={CreateActivity} style={{ backgroundColor: '#514eb5', width: 230, height: 50, margin: 20 }} fontSize={20} />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+        }
       </ImageBackground>
     );
   }else{

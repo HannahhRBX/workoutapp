@@ -33,7 +33,7 @@ export default function ManageWorkoutActivity({ navigation }) {
     
     try {
       // Update the workoutActivity at the specified index
-      const newWorkoutActivities = createWorkoutActivities.map((activity, activityIndex) => {
+      const newWorkoutActivities = [...createWorkoutActivities].reverse().map((activity, activityIndex) => {
         if (activityIndex === index) {
           return { activity: initialActivity, duration: duration, activityID: activityID, id: activity.id};
         }
@@ -41,7 +41,7 @@ export default function ManageWorkoutActivity({ navigation }) {
       });
 
       // Update the state
-      setCreateWorkoutActivities(newWorkoutActivities);
+      setCreateWorkoutActivities(newWorkoutActivities.reverse());
       navigation.navigate(redirect, { workout: route.params.workout });
       // If successful, navigate back to activities page
 

@@ -5,8 +5,8 @@ import { ImageBackground } from 'react-native';
 import Background from '../../assets/Background2.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
-
-
+import SelectedTabContext from '../../SelectedTabContext';
+import { UserContext } from '../../UserContext';
 
 // Login Page
 export default function Login({ navigation }) {
@@ -14,7 +14,8 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState('');
   const [errorText, setErrorText] = useState('');
   const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
-
+  const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
+  const [user, setUser] = useContext(UserContext);
   // Send login function to API
   const login = async () => {
     try{
@@ -38,9 +39,11 @@ export default function Login({ navigation }) {
         try {
           // Delete existing user object from local storage
           setCreateWorkoutActivities([]);
+          setSelectedTab('Home');
           await AsyncStorage.removeItem('user');
           // Store result user object in local storage and navigate to home
           await AsyncStorage.setItem('user', JSON.stringify(result));
+          setUser(result);
           navigation.navigate('Home', { user: result });
         } catch (e) {
           // handle error

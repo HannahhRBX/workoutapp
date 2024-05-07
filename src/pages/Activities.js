@@ -9,11 +9,10 @@ import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
 import ActivityWidget from '../components/ActivityWidget';
 import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
-
+import { UserContext } from '../../UserContext';
 // Activities Page
 export default function Activities({ navigation }) {
-  const route = useRoute();
-  let user = route.params?.user || null;
+  const [user, setUser] = useContext(UserContext);
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [activities, setActivities] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -24,7 +23,11 @@ export default function Activities({ navigation }) {
     try {
       await AsyncStorage.removeItem('user');
       setCreateWorkoutActivities([]);
-      navigation.navigate('Welcome');
+      setUser([]);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      });
     } catch(e) {
       console.error(e);
     }
@@ -84,11 +87,14 @@ export default function Activities({ navigation }) {
   // Allows for the navigation bar to be rerendered after navigating to different page
   useFocusEffect(
     React.useCallback(() => {
-      setSelectedTab('Activities');
-      GetActivities();
-    }, [])
+      if (user) {
+        setSelectedTab('Activities');
+        GetActivities();
+      }
+    }, [user])
   );
 
+  
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     GetActivities().then(() => setRefreshing(false));
