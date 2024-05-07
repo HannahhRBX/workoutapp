@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Dimensions, View, Text, StyleSheet, Image } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
 // Workout Average Widget
 export default function WorkoutAverage({ workouts, days }) {
   
+  const hasLoggedNoData = React.useRef(false);
   const daysAgo = Date.now() - days * 24 * 60 * 60 * 1000;
   const now = Date.now();
   // Filter the workouts for the past 'days' days
@@ -12,6 +13,16 @@ export default function WorkoutAverage({ workouts, days }) {
     .filter(workout => workout.timestamp >= daysAgo && workout.timestamp <= now)
     .sort((a, b) => a.timestamp - b.timestamp);
 
+  // Check to see if there are any workouts after applying timestamp filters
+  if (!pastDaysWorkouts || pastDaysWorkouts.length === 0) {
+    if (!hasLoggedNoData.current) {
+      console.log('No data available');
+      hasLoggedNoData.current = true;
+    }
+    return;
+  } else {
+    hasLoggedNoData.current = false;
+  }
 
   // Adds up total duration of all workouts in period
   let totalDuration = 0;

@@ -29,7 +29,7 @@ export default function App() {
   const [loading, setLoading] = useState(true); 
   const [selectedTab, setSelectedTab] = useState('Home');
   const [createWorkoutActivities, setCreateWorkoutActivities] = useState([]);
-
+  
   useEffect(() => {
     const fetchUser = async () => {
       const retrievedUser = await retrieveUser();
@@ -40,11 +40,12 @@ export default function App() {
     };
 
     fetchUser();
-  }, []);
+  }, [user]);
 
   const logoutUser = async () => {
     try {
       await AsyncStorage.removeItem('user');
+      setCreateWorkoutActivities([]);
       setUser(null);
       setLoading(false);
     } catch(e) {

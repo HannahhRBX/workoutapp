@@ -8,6 +8,7 @@ import { useRoute, useFocusEffect } from '@react-navigation/native';
 import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
 import ActivityWidget from '../components/ActivityWidget';
+import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
 
 // Activities Page
 export default function Activities({ navigation }) {
@@ -16,11 +17,13 @@ export default function Activities({ navigation }) {
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [activities, setActivities] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {
       await AsyncStorage.removeItem('user');
+      setCreateWorkoutActivities([]);
       navigation.navigate('Welcome');
     } catch(e) {
       console.error(e);
@@ -31,7 +34,7 @@ export default function Activities({ navigation }) {
   const GetActivities = async () => {
     try {
       if (user) {
-        const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/activities', {
+        const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/activities/user/${user.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -41,6 +44,7 @@ export default function Activities({ navigation }) {
         // If response ok, set activities to Activities state
         if (response.ok){
           const text = await response.text();
+          
           if (!text) {
             console.log('No data returned from the server');
             setActivities([]);

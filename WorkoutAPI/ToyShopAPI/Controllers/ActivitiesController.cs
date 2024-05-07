@@ -46,6 +46,20 @@ namespace WorkoutAPI.Controllers
             return ActivityModel;
         }
 
+        // GET: api/activities/user/5
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<ActivityModel>>> GetActivitiesByUserId(string userId)
+        {
+            var activities = await _context.Activities.Where(a => a.UserID == userId).ToListAsync();
+
+            if (activities == null)
+            {
+                return NotFound();
+            }
+
+            return activities;
+        }
+
         
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         // DTO for updating an existing activity

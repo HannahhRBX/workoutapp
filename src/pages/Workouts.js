@@ -26,6 +26,7 @@ export default function Workouts({ navigation }) {
   const logoutUser = async () => {
     try {
       await AsyncStorage.removeItem('user');
+      setCreateWorkoutActivities([]);
       navigation.navigate('Welcome');
     } catch(e) {
       console.error(e);

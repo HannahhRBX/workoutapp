@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
 import { StyledButton } from '../components/StyledButton';
 import { ImageBackground } from 'react-native';
 import Background from '../../assets/Background2.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
 
 
 
@@ -12,6 +13,7 @@ export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorText, setErrorText] = useState('');
+  const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
 
   // Send login function to API
   const login = async () => {
@@ -31,9 +33,13 @@ export default function Login({ navigation }) {
       if(response.ok) {
         const result = await response.json();
         
-
-        // Store the result object in local storage
+        
+        
         try {
+          // Delete existing user object from local storage
+          setCreateWorkoutActivities([]);
+          await AsyncStorage.removeItem('user');
+          // Store result user object in local storage and navigate to home
           await AsyncStorage.setItem('user', JSON.stringify(result));
           navigation.navigate('Home', { user: result });
         } catch (e) {

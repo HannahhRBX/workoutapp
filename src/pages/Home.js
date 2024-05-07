@@ -10,12 +10,14 @@ import SelectedTabContext from '../../SelectedTabContext';
 import WorkoutGraph from '../components/WorkoutGraphWidget';
 import WorkoutAverage from '../components/WorkoutAverageWidget';
 import WorkoutPieChart from '../components/WorkoutPieChartWidget';
+import { CreateWorkoutActivityContext } from '../../CreateWorkoutActivityContext';
 
 // Registration Page
 export default function Home({ navigation }) {
   const route = useRoute();
   let user = route.params?.user || null;
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
+  const [createWorkoutActivities, setCreateWorkoutActivities] = useContext(CreateWorkoutActivityContext);
   const [workouts, setWorkouts] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
   
@@ -23,6 +25,7 @@ export default function Home({ navigation }) {
   const logoutUser = async () => {
     try {
       await AsyncStorage.removeItem('user');
+      setCreateWorkoutActivities([]);
       navigation.navigate('Welcome');
     } catch(e) {
       console.error(e);
@@ -31,6 +34,7 @@ export default function Home({ navigation }) {
 
   // Get all workouts by UserID from workout API
   const GetWorkouts = async () => {
+    setWorkouts([]);
     try {
       if (user) {
         const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/user/${user.id}`, {
@@ -77,10 +81,11 @@ export default function Home({ navigation }) {
   // Allows for the navigation bar to be rerendered after navigating to a different page
   useFocusEffect(
     React.useCallback(() => {
+      GetWorkouts();
       setSelectedTab('Home');
     }, [])
   );
-  if (user && workouts.length > 0) {
+  if (user && workouts.length > 1) {
     
     return (
       // Background to be replicated across app

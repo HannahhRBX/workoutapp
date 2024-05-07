@@ -31,7 +31,7 @@ export default function AddActivities({ navigation }) {
   // Get all activities from workout API
   const GetActivities = async () => {
     if (user) {
-      const response = await fetch('https://workoutapi20240425230248.azurewebsites.net/api/activities', {
+      const response = await fetch(`https://workoutapi20240425230248.azurewebsites.net/api/activities/user/${user.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

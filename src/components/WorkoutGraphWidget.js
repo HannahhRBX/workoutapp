@@ -1,26 +1,50 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Dimensions, View, Text, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
 // Workout Graph Widget
 export default function WorkoutGraph({ workouts, days }) {
   const screenWidth = Dimensions.get('window').width;
- 
-  // Get the timestamp for 'days' days ago
+  const hasLoggedNoData = React.useRef(false);
+
+  
+  // Get timestamp for 'days' days ago
   const daysAgo = Date.now() - days * 24 * 60 * 60 * 1000;
   const now = Date.now();
-  // Filter the workouts for the past 'days' days
+  // Filter workouts for past 'days' days
   const pastDaysWorkouts = workouts
     .filter(workout => workout.timestamp >= daysAgo && workout.timestamp <= now)
     .sort((a, b) => a.timestamp - b.timestamp);
+  
+  // Check to see if there are any workouts after applying timestamp filters
+  if (!pastDaysWorkouts || pastDaysWorkouts.length === 0) {
+    if (!hasLoggedNoData.current) {
+      console.log('No data available');
+      hasLoggedNoData.current = true;
+    }
+    if (days == 7){
+      return (
+        <Text style={styles.emptyTitle}>No Statistics to Display.</Text>
+      );
+    }else{
+      return;
+    }
+    
+  } else {
+    hasLoggedNoData.current = false;
+  }
 
-  // Get the total workout time for each day
+  // Get total workout time for each day
   const data = pastDaysWorkouts.map(workout => {
     const totalDuration = workout.workoutActivities.reduce((total, activity) => total + activity.duration, 0) / 60;
     return totalDuration;
   });
+  //console.log(pastDaysWorkouts)
+  const isValidData = data.every(Number.isFinite);
 
-  // Get the date for 'days' days ago
+  
+
+  // Get date for 'days' days ago
   const date = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -175,5 +199,14 @@ const styles = StyleSheet.create({
     width: '100%',
     textAlign: 'left',
     color: '#2d2d2d',
+  },
+  emptyTitle: {
+    fontSize: 25,
+    fontWeight: '600',
+    color: '#2f2f2f',
+    textAlign: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 45,
   },
 });
