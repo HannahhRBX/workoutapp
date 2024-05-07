@@ -63,11 +63,10 @@ export default function Workouts({ navigation }) {
             console.log(data);
           }
         }
-      } else {
-        console.error('User not found');
+      
       }
     } catch (error) {
-      console.error(error);
+      
     }
   }
 
@@ -108,7 +107,7 @@ export default function Workouts({ navigation }) {
     GetWorkouts().then(() => setRefreshing(false));
   }, []);
   
-  if (user) {
+  if (user && workouts.length > 0) {
     
     return (
       // Background to be replicated across page
@@ -132,9 +131,14 @@ export default function Workouts({ navigation }) {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               >
-              {workouts.map((workout) => (
-                <WorkoutWidget key={workout.id} onPress={() => Manage(workout)} workout={workout} buttonText={"Details"} />
-              ))}
+              {workouts.length > 0 ? (
+                workouts.map((workout) => (
+                  <WorkoutWidget key={workout.id} onPress={() => Manage(workout)} workout={workout} buttonText={"Details"} />
+                ))
+                ) : (
+                  <Text style={styles.header}></Text>
+                )
+              }
             </ScrollView>
           </View>
         </ImageBackground>
@@ -145,11 +149,33 @@ export default function Workouts({ navigation }) {
   }else{
     return (
       // Display a loading screen while user is being fetched
-      <ImageBackground source={Background} style={styles.container}>
-        <View style={styles.container}>
-          <Text style={styles.header}>Please Wait...</Text>
-        </View>
-      </ImageBackground>
+      <>
+        <ImageBackground source={Background} style={styles.container}>
+          {/* Top Navigation Bar with Logout and Create Workout buttons */}
+          <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
+          <Text style={styles.header}>Workouts</Text>
+            <View style={styles.topLeftButton}>
+              <StyledButton title="" onPress={logoutUser} image={require('../../assets/Logout.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+            </View>
+            <View style={styles.topRightButton}>
+              <StyledButton title="" onPress={Create} image={require('../../assets/Plus.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+            </View>
+            </ImageBackground>
+
+          {/* Container for all Workout widgets with scrollable content box */}
+          <View style={styles.innerContainer}>
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * workouts.length) + 200, minHeight: (320 * workouts.length) + 200}}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              >
+              <Text style={styles.emptyTitle}>No Workouts to Display.</Text>
+            </ScrollView>
+          </View>
+        </ImageBackground>
+        {/* Bottom Navigation Bar */}
+        <NavigationBar onSelect={navigation.navigate} currentPage={selectedTab} />
+      </>
     );
   }
   
@@ -231,10 +257,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 57,
   },
-  header2: {
-    fontSize: 24,
+  emptyTitle: {
+    fontSize: 25,
     fontWeight: '600',
-    marginBottom: 20,
+    color: '#2f2f2f',
+    textAlign: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 45,
   },
   topLeftButton: {
     position: 'absolute',

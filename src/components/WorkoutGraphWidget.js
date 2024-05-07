@@ -2,9 +2,10 @@ import React from 'react';
 import { Dimensions, View, Text, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
+// Workout Graph Widget
 export default function WorkoutGraph({ workouts, days }) {
   const screenWidth = Dimensions.get('window').width;
-
+ 
   // Get the timestamp for 'days' days ago
   const daysAgo = Date.now() - days * 24 * 60 * 60 * 1000;
   const now = Date.now();
@@ -15,10 +16,11 @@ export default function WorkoutGraph({ workouts, days }) {
 
   // Get the total workout time for each day
   const data = pastDaysWorkouts.map(workout => {
-    
     const totalDuration = workout.workoutActivities.reduce((total, activity) => total + activity.duration, 0) / 60;
     return totalDuration;
   });
+
+  // Get the date for 'days' days ago
   const date = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -28,55 +30,63 @@ export default function WorkoutGraph({ workouts, days }) {
     textLabel = 'weekly';
   }
   
-
+  let previousLabel = null;
   return (
     
   <View style={styles.activityWidget}>
       <View style={styles.innerWidget}>
       <View style={{borderRadius: 10, backgroundColor: '#ffffff', width: '100%', height: '300', paddingBottom: -10, paddingTop:30, justifyContent:'center', alignItems:'center', alignContent:'center', marginBottom: 20 }}>
         <Text style={{...styles.activityHeader, paddingBottom: 20, padding:15}}>Here's your {textLabel} summary.</Text>
-                <View style={{ alignSelf: 'flex-start', paddingLeft: 28, marginBottom: -25 }}>
-                  <Text style={{...styles.activityHeader, fontSize: 18}}>Hours</Text>
-                </View>
-                <LineChart
-    data={{
-      labels: [daysAgoDate, '','','', 'Today'],
-      datasets: [{
-        data: data
-      }]
-    }}
-    width={screenWidth}
-    height={220}
-    bezier
-    
-    chartConfig={{
-  backgroundColor: '#fff',
-  backgroundGradientFrom: '#fff',
-  backgroundGradientTo: '#fff',
-  decimalPlaces: 0,
-  color: (opacity = 1) => "#514eb5", // purple
-  labelColor: (opacity = 1) => "#000000", // black
-  style: {
-    borderRadius: 16
-  },
-  propsForLabels: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    padding: 5,
-  },
-  propsForBackgroundLines: {
-    strokeDasharray: '10 10',
-    strokeWidth: 0.2,
-  }
-}}
-    style={{
-      marginVertical: 8,
-      borderRadius: 16,
-      padding: 10,
-    }}
-  />
-        
-        
+            <View style={{ alignSelf: 'flex-start', paddingLeft: 28, marginBottom: -25 }}>
+              <Text style={{...styles.activityHeader, fontSize: 18}}>Hours</Text>
+            </View>
+            <LineChart
+              data={{
+                labels: [daysAgoDate, '','','', 'Today'],
+                datasets: [{
+                  data: data}]
+                }}
+                width={screenWidth}
+                height={220}
+                bezier
+                yAxisInterval={1}
+                formatYLabel= {(label) => {
+                  if (label === previousLabel) {
+                    return '';
+                  } else {
+                    previousLabel = label;
+                    return label;
+                  }
+                }}
+                chartConfig={{
+                backgroundColor: '#fff',
+                backgroundGradientFrom: '#fff',
+                backgroundGradientTo: '#fff',
+                decimalPlaces: 0,
+                fromZero: true,
+                yAxisInterval: 1,
+                color: (opacity = 1) => "#514eb5",
+                labelColor: (opacity = 1) => "#000000",
+                style: {
+                  borderRadius: 16
+                },
+                propsForLabels: {
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  padding: 5,
+                },
+                propsForBackgroundLines: {
+                  strokeDasharray: '10 10',
+                  strokeWidth: 0.2,
+                },
+                
+              }}
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+                padding: 10,
+              }}
+            />
         </View>
       </View>
     </View>

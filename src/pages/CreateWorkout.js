@@ -171,9 +171,6 @@ export default function CreateWorkout({ navigation }) {
               <StyledButton title={stringStamp} onPress={() => setShow(true)} style={{ backgroundColor: '#514eb5', width: 'auto', height: 50, margin: 20, borderRadius: 10 }} fontSize={19}/>
               
             )}
-
-            
-
             {/* Iterate through all workout activities and create widgets in a scrollable list */}
             <Text style={styles.header2}>Workout Activities</Text>
             <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (340 * createWorkoutActivities.length) + 320, minHeight: (340 * createWorkoutActivities.length) + 320}}>
@@ -181,13 +178,10 @@ export default function CreateWorkout({ navigation }) {
               {createWorkoutActivities.map((activityItem, index) => (
                 <WorkoutActivityWidget key={index} onPress={() => Manage(activityItem, index)} activity={activityItem.activity} duration={activityItem.duration} buttonText={"Manage"} />
               ))}
-              
             </ScrollView>
           </View>
           <SubmitBar onPress={Create} buttonText={"Create"} />
         </ImageBackground>
-        
-        
       </>
     );
   }else{
@@ -295,10 +289,5 @@ const styles = StyleSheet.create({
     left: 0,
     zIndex: 5,
   },
-  topRightButton: {
-    position: 'absolute',
-    top: 30,
-    right: 0,
-    zIndex: 5,
-  },
+  
 });

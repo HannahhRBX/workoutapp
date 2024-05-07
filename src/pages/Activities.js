@@ -16,7 +16,7 @@ export default function Activities({ navigation }) {
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [activities, setActivities] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
-
+  
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {
@@ -41,6 +41,7 @@ export default function Activities({ navigation }) {
         // If response ok, set activities to Activities state
         if (response.ok){
           const text = await response.text();
+          console.log('Activities:', text);
           if (!text) {
             console.log('No data returned from the server');
             setActivities([]);
@@ -50,6 +51,7 @@ export default function Activities({ navigation }) {
           }
         }else{
           const text = await response.text();
+          console.log('Activities:', text, response.status,response);
           if (!text) {
             console.log('No data returned from the server');
           } else {
@@ -90,7 +92,7 @@ export default function Activities({ navigation }) {
     GetActivities().then(() => setRefreshing(false));
   }, []);
 
-  if (user) {
+  if (user && activities.length > 0) {
     
     return (
       // Background to be replicated across page
@@ -114,9 +116,14 @@ export default function Activities({ navigation }) {
                   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               >
-              {activities.map((activity) => (
-                <ActivityWidget key={activity.id} onPress={() => Manage(activity)} activity={activity} buttonText={"Manage"} />
-              ))}
+              {activities.length > 0 ? (
+                activities.map((activity) => (
+                  <ActivityWidget key={activity.id} onPress={() => Manage(activity)} activity={activity} buttonText={"Manage"} />
+                ))
+                ) : (
+                  <Text style={styles.header}></Text>
+                )
+              }
             </ScrollView>
           </View>
         </ImageBackground>
@@ -127,11 +134,33 @@ export default function Activities({ navigation }) {
   }else{
     return (
       // Display a loading screen while user is being fetched
-      <ImageBackground source={Background} style={styles.container}>
-        <View style={styles.container}>
-          <Text style={styles.header}>Please Wait...</Text>
-        </View>
-      </ImageBackground>
+      <>
+        <ImageBackground source={Background} style={styles.container}>
+          {/* Top Navigation Bar with Logout and Create Activity buttons */}
+          <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
+          <Text style={styles.header}>Activities</Text>
+            <View style={styles.topLeftButton}>
+              <StyledButton title="" onPress={logoutUser} image={require('../../assets/Logout.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+            </View>
+            <View style={styles.topRightButton}>
+              <StyledButton title="" onPress={Create} image={require('../../assets/Plus.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+            </View>
+            </ImageBackground>
+
+          {/* Container for all Activity widgets with scrollable content box */}
+          <View style={styles.innerContainer}>
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 200, minHeight: (320 * activities.length) + 200}}
+              refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              >
+              <Text style={styles.emptyTitle}>No Activities to Display.</Text>
+            </ScrollView>
+          </View>
+        </ImageBackground>
+        {/* Bottom Navigation Bar */}
+        <NavigationBar onSelect={navigation.navigate} currentPage={selectedTab} />
+      </>
     );
   }
   
@@ -213,10 +242,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 57,
   },
-  header2: {
-    fontSize: 24,
+  emptyTitle: {
+    fontSize: 25,
     fontWeight: '600',
-    marginBottom: 20,
+    color: '#2f2f2f',
+    textAlign: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 45,
   },
   topLeftButton: {
     position: 'absolute',

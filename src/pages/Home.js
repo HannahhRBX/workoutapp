@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { RefreshControl, StyleSheet, Text, View, Button, TextInput, ScrollView } from 'react-native';
+import { RefreshControl, StyleSheet, Text, View, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyledButton } from '../components/StyledButton';
 import { ImageBackground } from 'react-native';
@@ -8,6 +8,8 @@ import { useRoute, useFocusEffect } from '@react-navigation/native';
 import NavigationBar from '../components/NavigationBar';
 import SelectedTabContext from '../../SelectedTabContext';
 import WorkoutGraph from '../components/WorkoutGraphWidget';
+import WorkoutAverage from '../components/WorkoutAverageWidget';
+import WorkoutPieChart from '../components/WorkoutPieChartWidget';
 
 // Registration Page
 export default function Home({ navigation }) {
@@ -16,9 +18,11 @@ export default function Home({ navigation }) {
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [workouts, setWorkouts] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
-  workouts.map((workout, index) => {
-    console.log(workout);
-  });
+  if (workouts.length > 0) {
+    workouts.map((workout, index) => {
+      console.log(workout);
+    });
+  }
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {
@@ -83,7 +87,7 @@ export default function Home({ navigation }) {
       setSelectedTab('Home');
     }, [])
   );
-  if (user) {
+  if (user && workouts.length > 0) {
     
     return (
       // Background to be replicated across app
@@ -98,14 +102,17 @@ export default function Home({ navigation }) {
             
             </ImageBackground>
           <View style={styles.innerContainer}>
-            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (830 ) + 200, minHeight: (830) + 200, width: 370}}
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: 2200, minHeight: 2200, width: 370}}
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               >
               <WorkoutGraph workouts={workouts} days={7} />
+              <WorkoutAverage workouts={workouts} days={7} />
+              <WorkoutPieChart workouts={workouts} days={7} />
               <WorkoutGraph workouts={workouts} days={30} />
-              
+              <WorkoutAverage workouts={workouts} days={30} />
+              <WorkoutPieChart workouts={workouts} days={30} />
 
             </ScrollView>
           </View>
@@ -114,13 +121,32 @@ export default function Home({ navigation }) {
       </>
     );
   }else{
+    
     return (
-      <ImageBackground source={Background} style={styles.container}>
-        {/* Form and buttons for navigation */}
-        <View style={styles.container}>
-          <Text style={styles.header}>Please Wait...</Text>
-        </View>
-      </ImageBackground>
+      <>
+        <ImageBackground source={Background} style={styles.container}>
+          {/* Form and buttons for navigation */}
+          <ImageBackground source={require('../../assets/BarBackground2.png')} style={styles.topBar}>
+          <Text style={styles.header}>Home</Text>
+            <View style={styles.topLeftButton}>
+              <StyledButton title="" onPress={logoutUser} image={require('../../assets/Logout.png')} style={{ backgroundColor: '#514eb5', width: 50, height: 50, margin: 20 }} fontSize={25}/>
+            </View>
+            
+            </ImageBackground>
+          <View style={styles.innerContainer}>
+            <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (830 ) + 500, minHeight: (830) + 500, width: 370}}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              >
+              <Text style={styles.emptyTitle}>No Statistics to Display.</Text>
+
+            </ScrollView>
+            
+          </View>
+        </ImageBackground>
+        <NavigationBar onSelect={navigation.navigate} currentPage={selectedTab} />
+      </>
     );
   }
   
@@ -133,53 +159,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    width:'100%',
-  },
-  innerContainer: {
-    height: '100%',
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    zIndex: 1,
-  },
-  widgetContainer: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width:'100%',
-  },
-  input: {
-    height: 50,
-    width: 320,
-    margin: 12,
-    borderWidth: 1,
-    borderRadius: 10,
-    borderColor: 'silver',
-    padding: 10,
-    backgroundColor: '#ffffff',
-    fontSize: 18, 
-  },
-  header: {
-    fontSize: 30,
-    fontWeight: '600',
-    color: '#2f2f2f',
-    textAlign: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    top: 57,
-  },
-  header2: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 20,
-  },
-  topLeftButton: {
-    position: 'absolute',
-    top: 30,
-    left: 0,
-    zIndex: 15,
+    minWidth:'100%',
+    overflow: 'visible',
+    zIndex: 5,
   },
   topBar: {
     flex: 1,
@@ -200,4 +182,55 @@ const styles = StyleSheet.create({
     shadowRadius: 4.84,
     elevation: 5,
   },
+  innerContainer: {
+    flex: 1,
+    height: '100%',
+    minHeight: '100%',
+    maxHeight: '100%',
+    minWidth:'100%',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    overflow: 'visible',
+    zIndex: -5,
+    position: 'absolute',
+    top: 100,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    paddingTop: 20,
+  },
+  widgetContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    width: 500,
+    maxWidth: '100%',
+    overflow: 'visible',
+  },
+  header: {
+    fontSize: 30,
+    fontWeight: '600',
+    color: '#2f2f2f',
+    textAlign: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 57,
+  },
+  emptyTitle: {
+    fontSize: 25,
+    fontWeight: '600',
+    color: '#2f2f2f',
+    textAlign: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 45,
+  },
+  topLeftButton: {
+    position: 'absolute',
+    top: 30,
+    left: 0,
+    zIndex: 15,
+  },
+  
 });
