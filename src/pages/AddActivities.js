@@ -104,7 +104,7 @@ export default function AddActivities({ navigation }) {
           {/* Container for all Activity widgets with scrollable content box */}
           <View style={styles.innerContainer}>
             <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (320 * activities.length) + 200, minHeight: (320 * activities.length) + 200}}>
-              {activities.map((activity) => (
+              {[...activities].reverse().map((activity) => (
                 <ActivityWidget key={activity.id} onPress={() => { setShowPicker(true); setSelectedActivity(activity)}} activity={activity} buttonText={"Add"} />
               ))}
             </ScrollView>

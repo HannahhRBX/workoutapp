@@ -52,6 +52,8 @@ export default function Workouts({ navigation }) {
             setWorkouts([]);
           } else {
             const data = JSON.parse(text);
+            // Sort workouts by timestamp
+            data.sort((a, b) => parseInt(b.timestamp, 10) - parseInt(a.timestamp, 10));
             setWorkouts(data);
           }
         }else{

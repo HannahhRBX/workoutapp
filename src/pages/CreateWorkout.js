@@ -33,7 +33,6 @@ export default function CreateWorkout({ navigation }) {
   }
 
   const [show, setShow] = useState(false);
-  console.log(show)
   // Get all activities from workout API
   const GetActivitiesFromWorkout = async () => {
     if (user) {
@@ -175,7 +174,7 @@ export default function CreateWorkout({ navigation }) {
             <Text style={styles.header2}>Workout Activities</Text>
             <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (340 * createWorkoutActivities.length) + 320, minHeight: (340 * createWorkoutActivities.length) + 320}}>
               <AddWidget key={1} onPress={() => AddActivity()} />
-              {createWorkoutActivities.map((activityItem, index) => (
+              {[...createWorkoutActivities].reverse().map((activityItem, index) => (
                 <WorkoutActivityWidget key={index} onPress={() => Manage(activityItem, index)} activity={activityItem.activity} duration={activityItem.duration} buttonText={"Manage"} />
               ))}
             </ScrollView>

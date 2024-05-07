@@ -41,7 +41,6 @@ export default function Activities({ navigation }) {
         // If response ok, set activities to Activities state
         if (response.ok){
           const text = await response.text();
-          console.log('Activities:', text);
           if (!text) {
             console.log('No data returned from the server');
             setActivities([]);
@@ -51,7 +50,6 @@ export default function Activities({ navigation }) {
           }
         }else{
           const text = await response.text();
-          console.log('Activities:', text, response.status,response);
           if (!text) {
             console.log('No data returned from the server');
           } else {
@@ -117,7 +115,7 @@ export default function Activities({ navigation }) {
               }
               >
               {activities.length > 0 ? (
-                activities.map((activity) => (
+                [...activities].reverse().map((activity) => (
                   <ActivityWidget key={activity.id} onPress={() => Manage(activity)} activity={activity} buttonText={"Manage"} />
                 ))
                 ) : (

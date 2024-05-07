@@ -30,7 +30,7 @@ export default function ManageWorkoutActivity({ navigation }) {
 
   // Submit activity changes to context state
   const Submit = async () => {
-    console.log(createWorkoutActivities, duration, index, redirect)
+    
     try {
       // Update the workoutActivity at the specified index
       const newWorkoutActivities = createWorkoutActivities.map((activity, activityIndex) => {

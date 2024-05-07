@@ -22,7 +22,6 @@ export default function WorkoutPieChart({ workouts, days }) {
   // Get total hours for each activity across all workouts in period
   pastDaysWorkouts.forEach(workout => {
     workout.workoutActivities.forEach(activity => {
-      console.log(activity)
       if (activityDurations[activity.activityDetails.name]) {
         activityDurations[activity.activityDetails.name] += activity.duration;
       } else {

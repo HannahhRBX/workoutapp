@@ -24,7 +24,6 @@ export default function ManageWorkout({ navigation }) {
   const [date, setDate] = useState(new Date(Number(timestamp)));
   const [show, setShow] = useState(false);
   const [stringStamp, setStringStamp] = useState('Select Date');
-  console.log(id,userID,timestamp);
   
 
   const CalculateTime = (time) => {
@@ -63,8 +62,6 @@ export default function ManageWorkout({ navigation }) {
         const serverWorkoutActivities = data.workoutActivities;
         const stateWorkoutActivities = createWorkoutActivities;
         const workoutID = data.id;
-        console.log("Workout DATA: ",serverWorkoutActivities);
-        console.log("\nState DATA: ",stateWorkoutActivities);
 
         // If the server workout has activities
         if (data.workoutActivities){
@@ -74,7 +71,6 @@ export default function ManageWorkout({ navigation }) {
             const stateActivity = stateWorkoutActivities.find(stateActivity => stateActivity.id === serverActivity.id);
             if (!stateActivity) {
               // Send DELETE request
-              console.log("DELETING: ", serverActivity.id);
               fetch(`https://workoutapi20240425230248.azurewebsites.net/api/workouts/activity/${serverActivity.id}`, {
                   method: 'DELETE',
                   headers: {
@@ -151,7 +147,6 @@ export default function ManageWorkout({ navigation }) {
     }
   }
 
-  console.log(createWorkoutActivities)
   // Function to delete the workout and its workoutActivities
   const DeleteWorkout = async () => {
     if (user) {
@@ -303,7 +298,7 @@ export default function ManageWorkout({ navigation }) {
             <Text style={styles.header2}>Workout Activities</Text>
             <ScrollView contentContainerStyle={{...styles.widgetContainer, height: (340 * createWorkoutActivities.length) + 320, minHeight: (340 * createWorkoutActivities.length) + 320}}>
               <AddWidget key={1} onPress={() => AddActivity()} />
-              {createWorkoutActivities.map((activityItem, index) => (
+              {[...createWorkoutActivities].reverse().map((activityItem, index) => (
                 <WorkoutActivityWidget key={index} onPress={() => Manage(activityItem, index)} activity={activityItem.activity} duration={activityItem.duration} buttonText={"Manage"} />
               ))}
               

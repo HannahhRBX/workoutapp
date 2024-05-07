@@ -18,11 +18,7 @@ export default function Home({ navigation }) {
   const { selectedTab, setSelectedTab } = useContext(SelectedTabContext);
   const [workouts, setWorkouts] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
-  if (workouts.length > 0) {
-    workouts.map((workout, index) => {
-      console.log(workout);
-    });
-  }
+  
   // Delete user from local storage and navigate to welcome page
   const logoutUser = async () => {
     try {
@@ -58,9 +54,6 @@ export default function Home({ navigation }) {
           const text = await response.text();
           if (!text) {
             console.log('No data returned from the server');
-          } else {
-            const data = JSON.parse(text);
-            console.log(data);
           }
         }
       } else {
